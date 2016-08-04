@@ -4,10 +4,24 @@ var _ = require('lodash');
 var Alexa = require('alexa-app');
 var app = new Alexa.app('airportinfo');
 var FAADataHelper = require('./faa_data_helper');
+var rideHelper = require('./ride-helper');
 
+/*
+rideHelper = {
+  getEstimate: getEstimate,
+  home: home,
+  work: work,
+  uberEstimate: uberEstimate,
+  uberPrice: uberPrice
+};
+*/
+
+// we would have the same -- res.say(prompt) -- "do you want the fastest or cheapest ride" || "which type of ride (pool, X, select ... )"
+// no endsession, as utterances (destination)
 app.launch(function(req, res) {
   var prompt = 'For delay information, tell me an Airport code.';
-  res.say(prompt).reprompt(prompt).shouldEndSession(false);
+  rideHelper.getEstimate(rideHelper.home, rideHelper.work, rideHelper.uberEstimate);
+  // res.say(prompt).reprompt(prompt).shouldEndSession(false);
 });
 
 app.intent('airportinfo', {
