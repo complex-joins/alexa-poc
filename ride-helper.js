@@ -13,21 +13,28 @@ var uberProducts = '/products/';
 // lat: 37.7752135 , long: -122.4369302 // CHRIS house
 
 var getEstimate = function(start, dest, path) {
-  start = start || [37.7752135, -122.4369302];
-  dest = dest || [37.781653, -122.4091917];
+  start = [37.7752135, -122.4369302];
+  dest = [37.781653, -122.4091917];
 
-  var uber = 'https://api.uber.com/v1/' + path;
+  var body = {
+    start_latitude: start[0],
+    start_longitude: start[1],
+    end_latitude: dest[0],
+    end_longitude: dest[1],
+    "product_id": "26546650-e557-4a7b-86e7-6a3942445247" // SF UBER POOL
+  };
+
+  var uber = 'https://api.uber.com/v1/estimates/price?start_latitude=37.7752135&start_longitude=-122.4369302&end_latitude=37.781653&end_longitude=-122.4091917';
   fetch(uber, {
-    headers: {Authorization: 'Token pG-f76yk_TFCTMHtYHhY7xUfLVwmt9u-l4gmgiHE'},
-    body: {
-      start_latitude: start[0],
-      start_longitude: start[1],
-      end_latitude: dest[0],
-      end_longitude: dest[1],
-      "product_id": "26546650-e557-4a7b-86e7-6a3942445247" // SF UBER POOL
-    }
+    method: 'GET',
+    headers: {
+      Authorization: 'Token pG-f76yk_TFCTMHtYHhY7xUfLVwmt9u-l4gmgiHE',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body),
+    mode: 'cors'
   }).then( function(res) {
-    res.json();
+    return res.json();
   }).then( function(data) {
     console.log('success uber fetch', data);
   }).catch( function(err) {
