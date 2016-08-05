@@ -1,17 +1,5 @@
 var fetch = require('node-fetch');
 
-var home = [37.7752135, -122.4369302];
-var work = [37.781653, -122.4091917];
-var uberURL = 'https://api.uber.com/v1/';
-var lyftURL = 'https://api.lyft.com/v1/';
-
-var uberEstimate = 'estimates/time';
-var uberPrice = 'estimates/price';
-var uberProducts = '/products/';
-
-// lat: 37.781653,long: -122.4091917 // HR
-// lat: 37.7752135 , long: -122.4369302 // CHRIS house
-
 var placesCall = function(place) {
   var key = 'AIzaSyCHsQMx-gpiPsKxiKd9hhtEdR_GagDRHuw';
   var url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${place}&key=${key}`;
@@ -47,15 +35,39 @@ var placesCall = function(place) {
   // });
 };
 
-var getEstimate = function(start, dest, path) {
-// TODO: template literals.
-//var uber = `${uberURL}${path}?start_latitude=${home[0]}&start_longitude=${home[1]}&end_latitude=${work[0]}&end_longitude=${work[1]}`
-// var lyft = `${lyftURL}${path}?lat=${home[0]}&lng=${home[1]}&start_lat=${home[0]}&start_lng=${home[1]}&end_lat=${work[0]}&end_lng=${work[1]}`
-// NOTE: lyft has different parameters for user location based on eta/cost path.
-//
+var getEstimate = function(requestType, start, dest) {
+  // take input 'requestType' that will either be fastest or cheapest as string
+  var uberURL = 'https://api.uber.com/v1/';
+  var lyftURL = 'https://api.lyft.com/v1/';
 
-  var uber = 'https://api.uber.com/v1/estimates/price?start_latitude=37.7752135&start_longitude=-122.4369302&end_latitude=37.781653&end_longitude=-122.4091917';
-  fetch(uber, {
+  var uberPath;
+  var lyftPath;
+
+  start = start || [37.7752135, -122.4369302]; // HR
+  dest = dest || [37.781653, -122.4091917]; // Chris's house
+
+  if (requestType === 'cheapest') {
+    uberPath = 'estimates/price';
+    lyftPath = 'cost';
+  } else if (requestType === 'fastest') {
+    uberPath = 'estimates/time';
+    lyftPath = 'eta';
+  }
+
+  var uberEndpoint = `${uberURL}${uberPath}?start_latitude=${start[0]}&start_longitude=${start[1]}&end_latitude=${dest[0]}&end_longitude=${dest[1]}`;
+  var lyftEndpoint = `${lyftURL}${lyftPath}?lat=${start[0]}&lng=${start[1]}&start_lat=${start[0]}&start_lng=${start[1]}&end_lat=${dest[0]}&end_lng=${dest[1]}`;
+
+  // currently hardcoded and needs to be updated ~daily
+  var lyftToken = 'Bearer gAAAAABXo4M3_WiuuwJVC4jsg01BGsmd5c15Ntk39JvNPvsaEM815Fw6E8Ub-3ma0McwMY-DQvdRDqcjALoQbIgLzCd-aOJbXiAMemsVOlAiqChnovFueUi_jCGw1Y_gNQj7lCxUKG4DX12OH-erHrJrJkgL5_M6CZVR1dUdGRl3tyKfZLmpwgX4RqZJAfg5U0gXQtu8NEvD-BDb_Lncgl2Vr4I_X7rALA==';
+
+  // TODO: refactor index.js to pass a requestType based on user intent
+  // return alexa speech based on comparison result
+  // start google places experiment based on alexa custom slot
+
+  var firstResult = null;
+  var winner = null;
+
+  fetch(uberEndpoint, {
     method: 'GET',
     headers: {
       Authorization: 'Token pG-f76yk_TFCTMHtYHhY7xUfLVwmt9u-l4gmgiHE',
@@ -64,16 +76,28 @@ var getEstimate = function(start, dest, path) {
   }).then( function(res) {
     return res.json();
   }).then( function(data) {
-    console.log('success uber fetch - POOL', data.prices[0]);
+    var uberEstimate;
+
+    if (uberPath === 'estimates/price') {
+      var dollarsString = data.prices[0].estimate.slice(1);
+      // TODO: make car type dynamic. right now hardcoded to POOL by using data.prices[0]
+      uberEstimate = parseFloat(dollarsString) * 100;
+    } else if (uberPath === 'estimates/time') {
+      uberEstimate = data.times[0].estimate;
+    }
+
+    if (firstResult) {
+      winner = compare(uberEstimate, firstResult);
+      console.log('winner:', winner);
+    } else {
+      firstResult = uberEstimate;
+    }
+    console.log('success uber fetch - POOL', uberEstimate);
   }).catch( function(err) {
     console.log('error in uber fetch', err);
   });
 
-  var lyftPath = 'eta';
-  var lyft = `${lyftURL}${lyftPath}?lat=${home[0]}&lng=${home[1]}&start_lat=${home[0]}&start_lng=${home[1]}&end_lat=${work[0]}&end_lng=${work[1]}`
-  var lyftToken = 'Bearer gAAAAABXo4M3_WiuuwJVC4jsg01BGsmd5c15Ntk39JvNPvsaEM815Fw6E8Ub-3ma0McwMY-DQvdRDqcjALoQbIgLzCd-aOJbXiAMemsVOlAiqChnovFueUi_jCGw1Y_gNQj7lCxUKG4DX12OH-erHrJrJkgL5_M6CZVR1dUdGRl3tyKfZLmpwgX4RqZJAfg5U0gXQtu8NEvD-BDb_Lncgl2Vr4I_X7rALA==';
-
-  fetch(lyft, {
+  fetch(lyftEndpoint, {
     method: 'GET',
     headers: {
       Authorization: lyftToken,
@@ -82,20 +106,37 @@ var getEstimate = function(start, dest, path) {
   }).then( function(res) {
     return res.json();
   }).then( function(data) {
-    console.log('success lyft fetch', data);
+    var lyftEstimate;
+
+    if (lyftPath === 'cost') {
+      lyftEstimate = Number(data.cost_estimates[0].estimated_cost_cents_max);
+    } else if (lyftPath === 'eta') {
+      lyftEstimate = data.eta_estimates[0].eta_seconds;
+    }
+
+    if (firstResult) {
+      winner = compare(firstResult, lyftEstimate);
+      console.log('winner:', winner);
+    } else {
+      firstResult = lyftEstimate;
+    }
+    console.log('success lyft fetch', lyftEstimate);
   }).catch( function(err) {
     console.log('error in lyft fetch', err);
   });
 
+  var compare = function(uberEstimate, lyftEstimate) {
+    return uberEstimate < lyftEstimate ? { 'company': 'uber', 'estimate': uberEstimate }
+      : { 'company': 'lyft', 'estimate': lyftEstimate };
+    // TODO: what if they are equal? check the other dimension as well
+    // if that is also equal, return one randomly?
+  };
+
 };
 
 module.exports = {
-  getEstimate: getEstimate,
-  home: home,
-  work: work,
-  uberEstimate: uberEstimate,
-  uberPrice: uberPrice,
-  placesCall: placesCall
+  placesCall: placesCall,
+  getEstimate: getEstimate
 };
 
 // fetch(url, {

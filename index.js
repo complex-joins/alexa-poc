@@ -2,7 +2,7 @@
 module.change_code = 1;
 var _ = require('lodash');
 var Alexa = require('alexa-app');
-var app = new Alexa.app('airportinfo');
+var app = new Alexa.app('carvis');
 var FAADataHelper = require('./faa_data_helper');
 var rideHelper = require('./ride-helper');
 
@@ -10,12 +10,12 @@ var rideHelper = require('./ride-helper');
 // no endsession, as utterances (destination)
 app.launch(function(req, res) {
   var prompt = 'For delay information, tell me an Airport code.';
-  rideHelper.getEstimate(rideHelper.home, rideHelper.work, rideHelper.uberPrice);
   rideHelper.placesCall('944 market st');
+  rideHelper.getEstimate('fastest');
   // res.say(prompt).reprompt(prompt).shouldEndSession(false);
 });
 
-app.intent('airportinfo', {
+app.intent('carvis', {
   'slots': {
     'AIRPORTCODE': 'FAACODES'
   },
