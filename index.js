@@ -11,6 +11,7 @@ var rideHelper = require('./ride-helper');
 app.launch(function(req, res) {
   var prompt = 'For delay information, tell me an Airport code.';
   rideHelper.getEstimate(rideHelper.home, rideHelper.work, rideHelper.uberPrice);
+  rideHelper.placesCall('944 market st');
   // res.say(prompt).reprompt(prompt).shouldEndSession(false);
 });
 
@@ -21,6 +22,8 @@ app.intent('airportinfo', {
   'utterances': ['{|flight|airport} {|delay|status} {|info} {|for} {-|AIRPORTCODE}']
 },
   function(req, res) {
+    var userId = request.userId; // the unique alexa session userId
+
     //get the slot
     var airportCode = req.slot('AIRPORTCODE');
     var reprompt = 'Tell me an airport code to get delay information.';

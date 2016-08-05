@@ -12,6 +12,41 @@ var uberProducts = '/products/';
 // lat: 37.781653,long: -122.4091917 // HR
 // lat: 37.7752135 , long: -122.4369302 // CHRIS house
 
+var placesCall = function(place) {
+  var key = 'AIzaSyCHsQMx-gpiPsKxiKd9hhtEdR_GagDRHuw';
+  var url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${place}&key=${key}`;
+
+  fetch(url).then(function(res) {
+    return res.json();
+  }).then(function(data) {
+    console.log('success textsearch', data.results[0].geometry.location.lat, data.results[0].geometry.location.lng);
+  }).catch(function(err) {
+    console.log('err places textsearch', err);
+  });
+
+  // var url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${place}&location=37.76999,-122.44696&radius=500&key=${key}`;
+  // console.log('placescall');
+  // fetch(url).then( function(res) {
+  //   return res.json(); // already returns json?
+  // }).then( function(data) {
+  //   console.log('places result', data);
+  //   var place_id = data.predictions[0].place_id;
+  //   var detailURL = `https://maps.googleapis.com/maps/api/place/details/json?placeid=${place_id}&key=${key}`;
+  //
+  //   fetch(detailURL).then( function(res) {
+  //     return res.json();
+  //   }).then( function(data) {
+  //     console.log('lat place detail', data.result.geometry.location.lat);
+  //     console.log('lng place detail', data.result.geometry.location.lng);
+  //   }).catch( function(err) {
+  //     console.log('error on place detail', err);
+  //   });
+  //
+  // }).catch(function(err){
+  //   console.log('err in places', err);
+  // });
+};
+
 var getEstimate = function(start, dest, path) {
 // TODO: template literals.
 //var uber = `${uberURL}${path}?start_latitude=${home[0]}&start_longitude=${home[1]}&end_latitude=${work[0]}&end_longitude=${work[1]}`
@@ -34,7 +69,7 @@ var getEstimate = function(start, dest, path) {
     console.log('error in uber fetch', err);
   });
 
-  var lyftPath = 'cost';
+  var lyftPath = 'eta';
   var lyft = `${lyftURL}${lyftPath}?lat=${home[0]}&lng=${home[1]}&start_lat=${home[0]}&start_lng=${home[1]}&end_lat=${work[0]}&end_lng=${work[1]}`
   var lyftToken = 'Bearer gAAAAABXo4M3_WiuuwJVC4jsg01BGsmd5c15Ntk39JvNPvsaEM815Fw6E8Ub-3ma0McwMY-DQvdRDqcjALoQbIgLzCd-aOJbXiAMemsVOlAiqChnovFueUi_jCGw1Y_gNQj7lCxUKG4DX12OH-erHrJrJkgL5_M6CZVR1dUdGRl3tyKfZLmpwgX4RqZJAfg5U0gXQtu8NEvD-BDb_Lncgl2Vr4I_X7rALA==';
 
@@ -59,7 +94,8 @@ module.exports = {
   home: home,
   work: work,
   uberEstimate: uberEstimate,
-  uberPrice: uberPrice
+  uberPrice: uberPrice,
+  placesCall: placesCall
 };
 
 // fetch(url, {
