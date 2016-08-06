@@ -56,10 +56,9 @@ var lyftPhoneCodeAuth = function(phoneNumber, fourDigitCode, session, userLocati
 var getCost = function(token, session, origin, destination) {
   var url = baseURL + lyftMethods.getCost.path(origin, destination);
   var headers = lyftMethods.getCost.headers(token, session);
-  // note: no body.
 
   fetch(url, {
-    method: 'POST',
+    method: 'GET',
     headers: headers
   }).then( function(res) {
     return res.json();
