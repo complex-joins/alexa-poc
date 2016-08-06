@@ -1,4 +1,4 @@
-var lyftMethods = require('lyftPrivateMethods');
+var lyftMethods = require('./lyftPrivateMethods');
 var baseURL = 'https://api.lyft.com/v1/'; // on which path is added.
 
 // TODO: database posts in each response -- with generic key naming.
@@ -47,9 +47,10 @@ var lyftPhoneCodeAuth = function(phoneNumber, fourDigitCode, session) {
     console.log('error post of phoneCodeAuth LYFT', err);
   });
 };
-
-var getCost = function(token, session, endAddress, endLat, endLng, startLat, startLng, startAddress) {
-  var url = baseURL + lyftMethods.getCost.path(endAddress, endLat, endLng, startLat, startLng, startAddress);
+ // origin {startLat, startLng, startAddress}
+ // destination {endLat, endLng, endAddress}
+var getCost = function(token, session, origin, destination) {
+  var url = baseURL + lyftMethods.getCost.path(origin, destination);
   var headers = lyftMethods.getCost.headers(token, session);
   // note: no body.
 
@@ -64,7 +65,7 @@ var getCost = function(token, session, endAddress, endLat, endLng, startLat, sta
     // TODO: DB POST
     var responseObject = lyftMethods.getCost.responseMethod(data);
     // do something with responseObject.tripDuration ?
-    // return requestRide(token, session, responseObject.costToken, destination, origin, paymentInfo, partySize);
+    // return requestRide(token, session, responseObject.costToken, destination, origin, paymentInfo, partySize); // this is the next step
   }).catch( function(err) {
     console.log('error post of getCost LYFT', err);
   });
@@ -87,7 +88,7 @@ var requestRide = function(token, session, costToken, destination, origin, payme
 
     // TODO: DB POST
     var responseObject = lyftMethods.requestRide.responseMethod(data);
-    // next step? 
+    // next step?
   }).catch( function(err) {
     console.log('error post of requestRide LYFT', err);
   });
