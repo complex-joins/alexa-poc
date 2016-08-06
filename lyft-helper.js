@@ -29,7 +29,7 @@ var lyftPhoneAuth = function(phoneNumberString) {
 // NOTE: userLocation should come from the user client // Alexa.
 var lyftPhoneCodeAuth = function(phoneNumber, fourDigitCode, session, userLocation) {
 
-  userLocation = userLocation || {lat: 37.7773563, lng: -122.3968629}; // Shez. so things don't break, before we've done randomization.
+  userLocation = userLocation || null; // pass through userLocation if we have one, otherwise use randomly generated location.
 
   var url = baseURL + lyftMethods.phoneCodeAuth.path;
   var headers = lyftMethods.phoneCodeAuth.headers(session);
