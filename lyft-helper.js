@@ -68,6 +68,7 @@ var getCost = function(token, session, origin, destination) {
     // TODO: DB POST
     var responseObject = lyftMethods.getCost.responseMethod(data);
     // do something with responseObject.tripDuration ?
+    // TODO: setTimeout for 3 seconds. simulate user behavior.
     // return requestRide(token, session, responseObject.costToken, destination, origin, paymentInfo, partySize); // this is the next step
   }).catch( function(err) {
     console.log('error post of getCost LYFT', err);
