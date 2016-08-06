@@ -1,5 +1,5 @@
 var fetch = require('node-fetch');
-var placesCall = require('place-helper'); // invoked as placesCall();
+var placesCall = require('./place-helper'); // invoked as placesCall();
 
 // NOTE: refactor could be that one first does the placesCall in index.js or here, and on return of coordinates fire the getEstimate.
 
