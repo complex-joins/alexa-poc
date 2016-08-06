@@ -25,16 +25,15 @@ var getEstimate = function(requestType, start, dest) {
   var uberEndpoint = `${uberURL}${uberPath}?start_latitude=${start[0]}&start_longitude=${start[1]}&end_latitude=${dest[0]}&end_longitude=${dest[1]}`;
   var lyftEndpoint = `${lyftURL}${lyftPath}?lat=${start[0]}&lng=${start[1]}&start_lat=${start[0]}&start_lng=${start[1]}&end_lat=${dest[0]}&end_lng=${dest[1]}`;
 
-  // currently hardcoded and needs to be updated ~daily.
+  // currently hardcoded and needs to be updated ~daily
+  var lyftToken = 'Bearer gAAAAABXpNidCuyQX0kchhuvAhGu3zlZD8mX1ecTu2uRHIpWz6cWTm9xKPU_Gf2nRuF5Tg5SWuwmVXCVKxgeG2dOL8hlGsESfKFTqH05-8I4--iYFVlThooJj57OyInOc53tPmQcLzTe7yjJi-rpFKqwnQUASJzFFrOoiwzaW58dXiCDaC522eJ1mAmFmPTc9sP-OCuEFdiE9UVMwhp7oQS3bbi8LV2lEQ==';
+
   /* update via:
   curl -X POST -H "Content-Type: application/json" \
      --user "nhgXNFoIrr4Q:sinLMosFWSD9OiwgfnSEm3WN8y5Jd_0n" \
      -d '{"grant_type": "client_credentials", "scope": "public"}' \
      'https://api.lyft.com/oauth/token'
   */
-
-  // currently hardcoded and needs to be updated ~daily
-  var lyftToken = 'Bearer gAAAAABXpNidCuyQX0kchhuvAhGu3zlZD8mX1ecTu2uRHIpWz6cWTm9xKPU_Gf2nRuF5Tg5SWuwmVXCVKxgeG2dOL8hlGsESfKFTqH05-8I4--iYFVlThooJj57OyInOc53tPmQcLzTe7yjJi-rpFKqwnQUASJzFFrOoiwzaW58dXiCDaC522eJ1mAmFmPTc9sP-OCuEFdiE9UVMwhp7oQS3bbi8LV2lEQ==';
 
   // TODO: refactor index.js to pass a requestType based on user intent
   // return alexa speech based on comparison result

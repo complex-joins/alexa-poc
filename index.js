@@ -3,7 +3,6 @@ module.change_code = 1;
 var _ = require('lodash');
 var Alexa = require('alexa-app');
 var app = new Alexa.app('carvis');
-var FAADataHelper = require('./faa_data_helper');
 var rideHelper = require('./ride-helper');
 
 app.launch(function(req, res) {
@@ -14,8 +13,7 @@ app.launch(function(req, res) {
   // destination (and validation)
   // --> all this would be much shorter if we use presets from a webapp.
   // --> can also use user location from the phone, but less accurate.
-
-  var prompt = 'With CARVIS you can order the cheapest or fastest ride available. Tell me CHEAPEST or FASTEST and your start and end destinations';
+  var prompt = 'With CARVIS you can order the cheapest or fastest car available. For example, you can say, CARVIS, find me the cheapest ride to Hack Reactor';
 
   // NOTE: in launch only for testing
   rideHelper.placesCall('944 market st');
@@ -25,22 +23,22 @@ app.launch(function(req, res) {
   res.say(prompt).reprompt(prompt).shouldEndSession(false);
 });
 
-app.intent('carvis', {
+app.intent('GetEstimate', {
   'slots': {
     'MODE': 'MODE',
-    'DESTINATION': 'DESTINATION'
+    'DESTINATION': 'AMAZON.LITERAL'
   },
   // TODO: configure these properly. also look into ./resources/*
 },
   function(req, res) {
     var userId = request.userId; // the unique alexa session userId
-    console.log(userId);
+    console.log('userId:', userId);
 
     var mode = req.slot('MODE'); // cheapest or fastest
-    var reprompt = 'Tell me Cheapest of Fastest and where you want to go';
+    var reprompt = 'Tell me to book the cheapest or fastest car, and where you want to go';
     // todo: grab user location?
     if (_.isEmpty(mode)) {
-      var prompt = 'I didn\'t hear. Tell me cheapest or fastest';
+      var prompt = 'I didn\'t catch that. Please try again';
       res.say(prompt).reprompt(reprompt).shouldEndSession(false);
     } else {
       // TODO: where does location come in?
@@ -63,10 +61,8 @@ var exitFunction = function(req, res) {
   res.say(exitSpeech);
 };
 var helpFunction = function(req, res) {
-  var helpSpeech = 'Carvis enables you to find the cheapest and/or fastest rides to your destination.' + 'Just say cheapest or fastest and give us your start and end destinations to begin!';
+  var helpSpeech = 'CARVIS finds you the cheapest and/or fastest rides to your destination.' + 'To begin, tell me to book the cheapest or fastest car, and where you want to go';
   res.say(helpSpeech);
 };
 
-//hack to support custom utterances in utterance expansion string
-console.log(app.utterances().replace(/\{\-\|/g, '{'));
 module.exports = app;
