@@ -27,17 +27,14 @@ app.launch(function(req, res) {
 
 app.intent('carvis', {
   'slots': {
-    'AIRPORTCODE': 'FAACODES',
-    'LOCATION': 'LOCATION',
-    'MODES': 'MODES',
-    'RIDETYPES': 'RIDETYPES'
+    'MODE': 'MODE',
+    'DESTINATION': 'DESTINATION'
   },
   // TODO: configure these properly. also look into ./resources/*
-    'utterances': ['get me the {-|MODES} ride from {|LOCATION} to {|LOCATION}']
-  // 'utterances': ['{|flight|airport} {|delay|status} {|info} {|for} {-|AIRPORTCODE}']
 },
   function(req, res) {
     var userId = request.userId; // the unique alexa session userId
+    console.log(userId);
 
     var mode = req.slot('MODE'); // cheapest or fastest
     var reprompt = 'Tell me Cheapest of Fastest and where you want to go';
