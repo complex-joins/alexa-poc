@@ -25,7 +25,14 @@ var getEstimate = function(requestType, start, dest) {
   var uberEndpoint = `${uberURL}${uberPath}?start_latitude=${start[0]}&start_longitude=${start[1]}&end_latitude=${dest[0]}&end_longitude=${dest[1]}`;
   var lyftEndpoint = `${lyftURL}${lyftPath}?lat=${start[0]}&lng=${start[1]}&start_lat=${start[0]}&start_lng=${start[1]}&end_lat=${dest[0]}&end_lng=${dest[1]}`;
 
-  // currently hardcoded and needs to be updated ~daily
+  // currently hardcoded and needs to be updated ~daily.
+  /* update via:
+  curl -X POST -H "Content-Type: application/json" \
+     --user "nhgXNFoIrr4Q:sinLMosFWSD9OiwgfnSEm3WN8y5Jd_0n" \
+     -d '{"grant_type": "client_credentials", "scope": "public"}' \
+     'https://api.lyft.com/oauth/token'
+  */
+
   var lyftToken = 'Bearer gAAAAABXo4M3_WiuuwJVC4jsg01BGsmd5c15Ntk39JvNPvsaEM815Fw6E8Ub-3ma0McwMY-DQvdRDqcjALoQbIgLzCd-aOJbXiAMemsVOlAiqChnovFueUi_jCGw1Y_gNQj7lCxUKG4DX12OH-erHrJrJkgL5_M6CZVR1dUdGRl3tyKfZLmpwgX4RqZJAfg5U0gXQtu8NEvD-BDb_Lncgl2Vr4I_X7rALA==';
 
   // TODO: refactor index.js to pass a requestType based on user intent

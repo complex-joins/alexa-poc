@@ -20,6 +20,12 @@ $RECYCLE.BIN/
 node_modules
 
 # =========================
+# Private methods to APIs
+#=========================
+
+lyftPrivateMethods.js
+
+# =========================
 # Operating System Files
 # =========================
 
