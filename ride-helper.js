@@ -33,7 +33,8 @@ var getEstimate = function(requestType, start, dest) {
      'https://api.lyft.com/oauth/token'
   */
 
-  var lyftToken = 'Bearer gAAAAABXo4M3_WiuuwJVC4jsg01BGsmd5c15Ntk39JvNPvsaEM815Fw6E8Ub-3ma0McwMY-DQvdRDqcjALoQbIgLzCd-aOJbXiAMemsVOlAiqChnovFueUi_jCGw1Y_gNQj7lCxUKG4DX12OH-erHrJrJkgL5_M6CZVR1dUdGRl3tyKfZLmpwgX4RqZJAfg5U0gXQtu8NEvD-BDb_Lncgl2Vr4I_X7rALA==';
+  // currently hardcoded and needs to be updated ~daily
+  var lyftToken = 'Bearer gAAAAABXpNidCuyQX0kchhuvAhGu3zlZD8mX1ecTu2uRHIpWz6cWTm9xKPU_Gf2nRuF5Tg5SWuwmVXCVKxgeG2dOL8hlGsESfKFTqH05-8I4--iYFVlThooJj57OyInOc53tPmQcLzTe7yjJi-rpFKqwnQUASJzFFrOoiwzaW58dXiCDaC522eJ1mAmFmPTc9sP-OCuEFdiE9UVMwhp7oQS3bbi8LV2lEQ==';
 
   // TODO: refactor index.js to pass a requestType based on user intent
   // return alexa speech based on comparison result
