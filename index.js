@@ -5,6 +5,9 @@ var Alexa = require('alexa-app');
 var app = new Alexa.app('carvis');
 var rideHelper = require('./ride-helper');
 
+var prompt = 'With CARVIS you can order the cheapest or fastest car available. For example, you can say, CARVIS, find me the cheapest ride to Hack Reactor';
+var reprompt = 'Tell me to book the cheapest or fastest car, and where you want to go';
+
 app.launch(function(req, res) {
   // NOTE: we may have to split up our query into multiple utterances --
   // cheapest || fastest
@@ -13,15 +16,7 @@ app.launch(function(req, res) {
   // destination (and validation)
   // --> all this would be much shorter if we use presets from a webapp.
   // --> can also use user location from the phone, but less accurate.
-  var prompt = 'With CARVIS you can order the cheapest or fastest car available. For example, you can say, CARVIS, find me the cheapest ride to Hack Reactor';
-
-  // NOTE: in launch only for testing
-  rideHelper.placesCall('stanford university', function(dest) {
-    rideHelper.getEstimate('cheapest', dest);
-  });
-  // ============================== //
-
-  res.say(prompt).reprompt(prompt).shouldEndSession(false);
+  res.say(prompt).reprompt(reprompt).shouldEndSession(false);
 });
 
 app.intent('GetEstimate', {
@@ -29,22 +24,26 @@ app.intent('GetEstimate', {
     'MODE': 'MODE',
     'DESTINATION': 'AMAZON.LITERAL'
   },
-  // TODO: configure these properly. also look into ./resources/*
+  'utterances': [
+    '{Find|Get|Order|Call|Book} {a|one|the|me the|me a} {MODE} {car|ride} {to | DESTINATION}'
+  ]
 },
   function(req, res) {
-    var userId = request.userId; // the unique alexa session userId
+    var userId = req.userId; // the unique alexa session userId
     console.log('userId:', userId);
 
     var mode = req.slot('MODE'); // cheapest or fastest
-    var reprompt = 'Tell me to book the cheapest or fastest car, and where you want to go';
+    var destination = req.slot('DESTINATION');
     // todo: grab user location?
-    if (_.isEmpty(mode)) {
-      var prompt = 'I didn\'t catch that. Please try again';
+    if (_.isEmpty(mode) || _.isEmpty(destination)) {
+      prompt = 'I didn\'t catch that. Please try again';
       res.say(prompt).reprompt(reprompt).shouldEndSession(false);
     } else {
-      // TODO: where does location come in?
-      // TODO: rideHelper.placesCall(place); -- once for pickup & destination?
-      // TODO: call rideHelper.getEstimate(mode);
+      rideHelper.placesCall(destination, function(destCoords) {
+        rideHelper.getEstimate(mode, destCoords);
+      });
+
+      // TODO: populate alexa's reply in this case
 
       // we need to include this to end session
       res.say(prompt).reprompt(reprompt).shouldEndSession(true);

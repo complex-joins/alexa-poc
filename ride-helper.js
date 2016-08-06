@@ -26,7 +26,7 @@ var getEstimate = function(requestType, dest, start) {
   var lyftEndpoint = `${lyftURL}${lyftPath}?lat=${start[0]}&lng=${start[1]}&start_lat=${start[0]}&start_lng=${start[1]}&end_lat=${dest[0]}&end_lng=${dest[1]}`;
 
   // currently hardcoded and needs to be updated ~daily
-  var lyftToken = 'Bearer gAAAAABXpNidCuyQX0kchhuvAhGu3zlZD8mX1ecTu2uRHIpWz6cWTm9xKPU_Gf2nRuF5Tg5SWuwmVXCVKxgeG2dOL8hlGsESfKFTqH05-8I4--iYFVlThooJj57OyInOc53tPmQcLzTe7yjJi-rpFKqwnQUASJzFFrOoiwzaW58dXiCDaC522eJ1mAmFmPTc9sP-OCuEFdiE9UVMwhp7oQS3bbi8LV2lEQ==';
+  var lyftToken = 'Bearer gAAAAABXpjQCisq76Eoa-rY_t503fGT6xAZhAaq1j3HI3-MUjlKowWsskhWQXmsw2CKRGT_f6oVW-xNYXE75kjltjfx7WitbXj70UX8Tzps55xDGcHQPI2NpPtdx23EcDbqh6f-zlU50g9sUV7Mey5EMyLi2H1tYrsVik0c3sXz63tDxqbj8aR650diL0mOEP1Az5BPJnkywmUTY6dllo4hB5Aixv8VDfA==';
 
   /* update via:
   curl -X POST -H "Content-Type: application/json" \

@@ -1,7 +1,7 @@
 {
-  "name": "airportinfo",
+  "name": "carvis",
   "version": "1.0.0",
-  "description": "track FAA Airport status",
+  "description": "Call A Ride Verbally, It's Simple",
   "main": "index.js",
   "scripts": {
     "test": "mocha test/"
