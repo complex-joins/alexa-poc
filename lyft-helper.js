@@ -1,6 +1,8 @@
 var lyftMethods = require('lyftPrivateMethods');
 var baseURL = 'https://api.lyft.com/v1/'; // on which path is added.
 
+// TODO: database posts in each response -- with generic key naming.
+
 var lyftPhoneAuth = function(phoneNumberString) {
   var url = baseURL + lyftMethods.phoneAuth.path;
   var headers = lyftMethods.phoneAuth.headers; // or headers() ?
@@ -9,33 +11,37 @@ var lyftPhoneAuth = function(phoneNumberString) {
   fetch(url, {
     method: 'POST',
     headers: headers,
-    body: body // JSON.stringify ? or done in privateMethods ?
+    body: JSON.stringify(body)
   }).then( function(res) {
     return res.json();
   }).then( function(data) {
     console.log('successful phoneNumber post LYFT', data);
-    // TODO: next step. this also depends on the user input of 2FA code.
     // response irrelevant unless we pass through session
+
+    // the responseMethod function returns an object with the parameters we need for subsequent operations only, and in a key-name generalised manner.
+    var responseObject = lyftMethods.phoneAuth.responseMethod(data);
+    // DB post.
   }).catch( function(err) {
     console.log('error post of phoneNumber LYFT', err);
   });
 };
 
-var lyftPhoneCodeAuth = function(fourDigitCode, session) {
+var lyftPhoneCodeAuth = function(phoneNumber, fourDigitCode, session) {
   var url = baseURL + lyftMethods.phoneCodeAuth.path;
   var headers = lyftMethods.phoneCodeAuth.headers(session);
-  var body = lyftMethods.phoneCodeAuth.body(fourDigitCode);
+  var body = lyftMethods.phoneCodeAuth.body(phoneNumber, fourDigitCode);
 
   fetch(url, {
     method: 'POST',
     headers: headers,
-    body: body // JSON.stringify ? or done in privateMethods ?
+    body: JSON.stringify(body)
   }).then( function(res) {
     return res.json();
   }).then( function(data) {
     console.log('successful phoneCodeAuth post LYFT', data);
 
-    // TODO: next step.
+    // TODO: DB POST
+    var responseObject = lyftMethods.phoneCodeAuth.responseMethod(data);
 
   }).catch( function(err) {
     console.log('error post of phoneCodeAuth LYFT', err);
@@ -46,8 +52,22 @@ var getCost = function(token, session, endAddress, endLat, endLng, startLat, sta
   var url = baseURL + lyftMethods.getCost.path(endAddress, endLat, endLng, startLat, startLng, startAddress);
   var headers = lyftMethods.getCost.headers(token, session);
   // note: no body.
-  
-  // TODO: fetch.
+
+  fetch(url, {
+    method: 'POST',
+    headers: headers
+  }).then( function(res) {
+    return res.json();
+  }).then( function(data) {
+    console.log('successful getCost post LYFT', data);
+
+    // TODO: DB POST
+    var responseObject = lyftMethods.getCost.responseMethod(data);
+    // do something with responseObject.tripDuration ?
+    // return requestRide(token, session, responseObject.costToken, destination, origin, paymentInfo, partySize);
+  }).catch( function(err) {
+    console.log('error post of getCost LYFT', err);
+  });
 
 };
 
@@ -56,5 +76,19 @@ var requestRide = function(token, session, costToken, destination, origin, payme
   var headers = lyftMethods.requestRide.headers(token, session);
   var body = lyftMethods.requestRide.body(costToken, destination, origin, paymentInfo, partySize);
 
-  // TODO: fetch.
+  fetch(url, {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify(body)
+  }).then( function(res) {
+    return res.json();
+  }).then( function(data) {
+    console.log('successful requestRide post LYFT', data);
+
+    // TODO: DB POST
+    var responseObject = lyftMethods.requestRide.responseMethod(data);
+    // next step? 
+  }).catch( function(err) {
+    console.log('error post of requestRide LYFT', err);
+  });
 };
