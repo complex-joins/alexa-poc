@@ -2,37 +2,37 @@ var fetch = require('node-fetch');
 
 var placesCall = function(place) {
   var key = 'AIzaSyCHsQMx-gpiPsKxiKd9hhtEdR_GagDRHuw';
-  var url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${place}&key=${key}`;
+  // var url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${place}&key=${key}`;
 
-  fetch(url).then(function(res) {
-    return res.json();
-  }).then(function(data) {
-    console.log('success textsearch', data.results[0].geometry.location.lat, data.results[0].geometry.location.lng);
-  }).catch(function(err) {
-    console.log('err places textsearch', err);
-  });
-
-  // var url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${place}&location=37.76999,-122.44696&radius=500&key=${key}`;
-  // console.log('placescall');
-  // fetch(url).then( function(res) {
-  //   return res.json(); // already returns json?
-  // }).then( function(data) {
-  //   console.log('places result', data);
-  //   var place_id = data.predictions[0].place_id;
-  //   var detailURL = `https://maps.googleapis.com/maps/api/place/details/json?placeid=${place_id}&key=${key}`;
-  //
-  //   fetch(detailURL).then( function(res) {
-  //     return res.json();
-  //   }).then( function(data) {
-  //     console.log('lat place detail', data.result.geometry.location.lat);
-  //     console.log('lng place detail', data.result.geometry.location.lng);
-  //   }).catch( function(err) {
-  //     console.log('error on place detail', err);
-  //   });
-  //
-  // }).catch(function(err){
-  //   console.log('err in places', err);
+  // fetch(url).then(function(res) {
+  //   return res.json();
+  // }).then(function(data) {
+  //   console.log('success textsearch', data.results[0].geometry.location.lat, data.results[0].geometry.location.lng);
+  // }).catch(function(err) {
+  //   console.log('err places textsearch', err);
   // });
+
+  var url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${place}&location=37.76999,-122.44696&radius=50000&key=${key}`;
+  console.log('placescall');
+  fetch(url).then( function(res) {
+    return res.json(); // already returns json?
+  }).then( function(data) {
+    console.log('places result', data);
+    var placeId = data.predictions[0].place_id;
+    var detailURL = `https://maps.googleapis.com/maps/api/place/details/json?placeid=${placeId}&key=${key}`;
+  
+    fetch(detailURL).then( function(res) {
+      return res.json();
+    }).then( function(data) {
+      console.log('lat place detail', data.result.geometry.location.lat);
+      console.log('lng place detail', data.result.geometry.location.lng);
+    }).catch( function(err) {
+      console.log('error on place detail', err);
+    });
+  
+  }).catch(function(err){
+    console.log('err in places', err);
+  });
 };
 
 var getEstimate = function(requestType, start, dest) {
@@ -58,7 +58,7 @@ var getEstimate = function(requestType, start, dest) {
   var lyftEndpoint = `${lyftURL}${lyftPath}?lat=${start[0]}&lng=${start[1]}&start_lat=${start[0]}&start_lng=${start[1]}&end_lat=${dest[0]}&end_lng=${dest[1]}`;
 
   // currently hardcoded and needs to be updated ~daily
-  var lyftToken = 'Bearer gAAAAABXo4M3_WiuuwJVC4jsg01BGsmd5c15Ntk39JvNPvsaEM815Fw6E8Ub-3ma0McwMY-DQvdRDqcjALoQbIgLzCd-aOJbXiAMemsVOlAiqChnovFueUi_jCGw1Y_gNQj7lCxUKG4DX12OH-erHrJrJkgL5_M6CZVR1dUdGRl3tyKfZLmpwgX4RqZJAfg5U0gXQtu8NEvD-BDb_Lncgl2Vr4I_X7rALA==';
+  var lyftToken = 'Bearer gAAAAABXpNidCuyQX0kchhuvAhGu3zlZD8mX1ecTu2uRHIpWz6cWTm9xKPU_Gf2nRuF5Tg5SWuwmVXCVKxgeG2dOL8hlGsESfKFTqH05-8I4--iYFVlThooJj57OyInOc53tPmQcLzTe7yjJi-rpFKqwnQUASJzFFrOoiwzaW58dXiCDaC522eJ1mAmFmPTc9sP-OCuEFdiE9UVMwhp7oQS3bbi8LV2lEQ==';
 
   // TODO: refactor index.js to pass a requestType based on user intent
   // return alexa speech based on comparison result
