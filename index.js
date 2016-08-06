@@ -16,8 +16,9 @@ app.launch(function(req, res) {
   var prompt = 'With CARVIS you can order the cheapest or fastest car available. For example, you can say, CARVIS, find me the cheapest ride to Hack Reactor';
 
   // NOTE: in launch only for testing
-  rideHelper.placesCall('944 market st');
-  rideHelper.getEstimate('fastest');
+  rideHelper.placesCall('stanford university', function(dest) {
+    rideHelper.getEstimate('cheapest', dest);
+  });
   // ============================== //
 
   res.say(prompt).reprompt(prompt).shouldEndSession(false);

@@ -3,7 +3,7 @@ var placesCall = require('./place-helper'); // invoked as placesCall();
 
 // NOTE: refactor could be that one first does the placesCall in index.js or here, and on return of coordinates fire the getEstimate.
 
-var getEstimate = function(requestType, start, dest) {
+var getEstimate = function(requestType, dest, start) {
   // take input 'requestType' that will either be 'fastest' or 'cheapest'
   var uberURL = 'https://api.uber.com/v1/';
   var lyftURL = 'https://api.lyft.com/v1/';
@@ -11,8 +11,8 @@ var getEstimate = function(requestType, start, dest) {
   var uberPath;
   var lyftPath;
 
-  start = start || [37.7752135, -122.4369302]; // HR
-  dest = dest || [37.781653, -122.4091917]; // Chris's house
+  start = start || [37.7773563, -122.3968629]; // Shez's house
+  dest = dest || [37.7836966, -122.4111551]; // HR
 
   if (requestType === 'cheapest') {
     uberPath = 'estimates/price';
@@ -62,11 +62,11 @@ var getEstimate = function(requestType, start, dest) {
 
     if (firstResult) {
       winner = compare(uberEstimate, firstResult);
-      console.log('winner:', winner);
+      console.log('Winner:', winner);
     } else {
       firstResult = uberEstimate;
     }
-    console.log('success uber fetch - POOL', uberEstimate);
+    console.log('Uber Pool estimate:', uberEstimate);
   }).catch( function(err) {
     console.log('error in uber fetch', err);
   });
@@ -94,14 +94,14 @@ var getEstimate = function(requestType, start, dest) {
     } else {
       firstResult = lyftEstimate;
     }
-    console.log('success lyft fetch', lyftEstimate);
+    console.log('Lyft Line estimate:', lyftEstimate);
   }).catch( function(err) {
     console.log('error in lyft fetch', err);
   });
 
   var compare = function(uberEstimate, lyftEstimate) {
-    return uberEstimate < lyftEstimate ? { 'company': 'uber', 'estimate': uberEstimate }
-      : { 'company': 'lyft', 'estimate': lyftEstimate };
+    return uberEstimate < lyftEstimate ? { 'Company': 'Uber', 'Estimate': uberEstimate }
+      : { 'Company': 'Lyft', 'Estimate': lyftEstimate };
     // TODO: what if they are equal? check the other dimension as well
     // if that is also equal, return one randomly?
   };
