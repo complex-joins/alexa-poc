@@ -19,17 +19,21 @@ var lyftPhoneAuth = function(phoneNumberString) {
     // response irrelevant unless we pass through session
 
     // the responseMethod function returns an object with the parameters we need for subsequent operations only, and in a key-name generalised manner.
-    var responseObject = lyftMethods.phoneAuth.responseMethod(data);
+    // var responseObject = lyftMethods.phoneAuth.responseMethod(data);
     // DB post.
   }).catch( function(err) {
     console.log('error post of phoneNumber LYFT', err);
   });
 };
 
-var lyftPhoneCodeAuth = function(phoneNumber, fourDigitCode, session) {
+// NOTE: userLocation should come from the user client // Alexa.
+var lyftPhoneCodeAuth = function(phoneNumber, fourDigitCode, session, userLocation) {
+
+  userLocation = userLocation || {lat: 37.7773563, lng: -122.3968629}; // Shez. so things don't break, before we've done randomization.
+
   var url = baseURL + lyftMethods.phoneCodeAuth.path;
   var headers = lyftMethods.phoneCodeAuth.headers(session);
-  var body = lyftMethods.phoneCodeAuth.body(phoneNumber, fourDigitCode);
+  var body = lyftMethods.phoneCodeAuth.body(phoneNumber, fourDigitCode, userLocation);
 
   fetch(url, {
     method: 'POST',
@@ -40,7 +44,7 @@ var lyftPhoneCodeAuth = function(phoneNumber, fourDigitCode, session) {
   }).then( function(data) {
     console.log('successful phoneCodeAuth post LYFT', data);
 
-    // TODO: DB POST
+    // TODO: DB POST // responseObject.dbUserProps (email, name etc.)
     var responseObject = lyftMethods.phoneCodeAuth.responseMethod(data);
 
   }).catch( function(err) {
