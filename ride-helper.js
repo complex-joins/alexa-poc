@@ -3,7 +3,7 @@ var placesCall = require('./place-helper'); // invoked as placesCall();
 
 // NOTE: refactor could be that one first does the placesCall in index.js or here, and on return of coordinates fire the getEstimate.
 
-var getEstimate = function(requestType, dest, start) {
+var getEstimate = function(requestType, dest, cb, start) {
   // take input 'requestType' that will either be 'fastest' or 'cheapest'
   var uberURL = 'https://api.uber.com/v1/';
   var lyftURL = 'https://api.lyft.com/v1/';
@@ -63,6 +63,7 @@ var getEstimate = function(requestType, dest, start) {
     if (firstResult) {
       winner = compare(uberEstimate, firstResult);
       console.log('Winner:', winner);
+      cb(winner);
     } else {
       firstResult = uberEstimate;
     }
@@ -91,6 +92,7 @@ var getEstimate = function(requestType, dest, start) {
     if (firstResult) {
       winner = compare(firstResult, lyftEstimate);
       console.log('winner:', winner);
+      cb(winner);
     } else {
       firstResult = lyftEstimate;
     }
@@ -100,8 +102,8 @@ var getEstimate = function(requestType, dest, start) {
   });
 
   var compare = function(uberEstimate, lyftEstimate) {
-    return uberEstimate < lyftEstimate ? { 'Company': 'Uber', 'Estimate': uberEstimate }
-      : { 'Company': 'Lyft', 'Estimate': lyftEstimate };
+    return uberEstimate < lyftEstimate ? { 'company': 'Uber', 'estimate': uberEstimate }
+      : { 'company': 'Lyft', 'estimate': lyftEstimate };
     // TODO: what if they are equal? check the other dimension as well
     // if that is also equal, return one randomly?
   };

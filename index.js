@@ -40,14 +40,16 @@ app.intent('GetEstimate', {
       res.say(prompt).reprompt(reprompt).shouldEndSession(false);
     } else {
       rideHelper.placesCall(destination, function(destCoords) {
-        rideHelper.getEstimate(mode, destCoords);
+        rideHelper.getEstimate(mode, destCoords, function(winner) {
+          var answer = formatAnswer(winner, mode);
+          res.say(answer).send();
+        });
       });
 
-      // TODO: populate alexa's reply in this case
-
-      // we need to include this to end session
-      res.say(prompt).reprompt(reprompt).shouldEndSession(true);
     }
+    // Intent handlers that don't return an immediate response (because they 
+    // do some asynchronous operation) must return false
+    return false;
   }
 );
 
@@ -55,6 +57,12 @@ app.intent('GetEstimate', {
 app.intent('AMAZON.StopIntent', exitFunction);
 app.intent('AMAZON.CancelIntent', exitFunction);
 app.intent('AMAZON.HelpIntent', helpFunction);
+
+var formatAnswer = function(winner, mode) {
+  var answer = `The ${mode} ride is from ${winner.company}, with an estimate of ${winner.estimate} `;
+  answer += (mode === 'cheapest') ? 'cents' : 'seconds';
+  return answer;
+};
 
 var exitFunction = function(req, res) {
   var exitSpeech = 'Have a good one!';
