@@ -44,7 +44,7 @@ var getEstimate = function(requestType, dest, cb, start) {
     dest1: dest[1]
   });
 
-  lyftToken = 'Bearer ' + lyftToken;
+  var lyftAuth = 'Bearer ' + lyftToken;
 
   var firstResult = null;
   var winner = null;
@@ -90,7 +90,7 @@ var getEstimate = function(requestType, dest, cb, start) {
   fetch(lyftEndpoint, {
     method: 'GET',
     headers: {
-      Authorization: lyftToken,
+      Authorization: lyftAuth,
       'Content-Type': 'application/json'
     }
   }).then( function(res) {
@@ -108,7 +108,11 @@ var getEstimate = function(requestType, dest, cb, start) {
       // TODO: make calls to BOTH time and price and return both to alexa as details
       // esp since lyft will still give a time estimate even when there's no valid fare
       // (ex: destination = 'gardendale')
-      lyftEstimate = data.eta_estimates[0].eta_seconds;
+      if (!data.eta_estimates || !data.eta_estimates[0].eta_seconds) {
+        lyftEstimate = -1;
+      } else {
+        lyftEstimate = data.eta_estimates[0].eta_seconds;
+      }
     }
 
     if (firstResult) {
