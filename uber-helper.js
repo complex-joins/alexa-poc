@@ -5,12 +5,10 @@ var baseURL = 'http://cn-sjc1.uber.com'; // https ?
 var login = function(username, password) {
   var path = uberMethods.login.path;
   var body = uberMethods.login.body(username, password);
-  // headers
+  var headers = uberMethods.login.headers();
 
   fetch(baseURL + path, {
-    headers: {
-      // TODO: confirm if we need these headers and how to do them.
-    },
+    headers: headers,
     body: JSON.stringify(body)
   }).then( function(res) {
     return res.json();
@@ -26,12 +24,10 @@ var login = function(username, password) {
 var requestRide = function(origin) {
   var path = uberMethods.requestRide.path;
   var body = uberMethods.requestRide.body(origin);
-  // headers
+  var headers = uberMethods.requestRide.headers();
 
   fetch(baseURL + path, {
-    headers: {
-      // TODO: confirm if we need these headers and how to do them.
-    },
+    headers: headers,
     body: JSON.stringify(body)
   }).then( function(res) {
     return res.json();
@@ -46,13 +42,11 @@ var requestRide = function(origin) {
 
 var confirmPickup = function(priceToken, priceId, destination) {
   var path = uberMethods.confirmPickup.path;
-  var body = uberMethods.requestRide.body(priceToken, priceId, destination);
-  // headers
+  var body = uberMethods.confirmPickup.body(priceToken, priceId, destination);
+  var headers = uberMethods.confirmPickup.headers();
 
   fetch(baseURL + path, {
-    headers: {
-      // TODO: confirm if we need these headers and how to do them.
-    },
+    headers: headers,
     body: JSON.stringify(body)
   }).then( function(res) {
     return res.json();
