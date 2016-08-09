@@ -24,6 +24,8 @@ node_modules
 #=========================
 
 lyftPrivateMethods.js
+uberPrivateMethods.js
+uberPrivateAPIresponses.js
 
 # =========================
 # Operating System Files

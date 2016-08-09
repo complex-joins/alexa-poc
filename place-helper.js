@@ -16,6 +16,10 @@ var placesCall = function(place, cb) {
     }).then( function(data) {
       var placeLat = data.result.geometry.location.lat;
       var placeLong = data.result.geometry.location.lng;
+      var routableAddress = data.result.formatted_address;
+      // ie. "48 Pirrama Road, Pyrmont NSW, Australia"
+      // NOTE: we need this in for both origin and destination.
+      // store this somewhere ? 
 
       cb([placeLat, placeLong]);
     }).catch( function(err) {
