@@ -1,3 +1,4 @@
+var fetch = require('node-fetch');
 var lyftMethods = require('./lyftPrivateMethods');
 var baseURL = 'https://api.lyft.com/v1/'; // on which path is added.
 
@@ -19,7 +20,7 @@ var lyftPhoneAuth = function(phoneNumberString) {
     // response irrelevant unless we pass through session
 
     // the responseMethod function returns an object with the parameters we need for subsequent operations only, and in a key-name generalised manner.
-    // var responseObject = lyftMethods.phoneAuth.responseMethod(data);
+    var response = lyftMethods.phoneAuth.responseMethod(data);
     // DB post.
   }).catch( function(err) {
     console.log('error post of phoneNumber LYFT', err);
@@ -45,7 +46,7 @@ var lyftPhoneCodeAuth = function(phoneNumber, fourDigitCode, session, userLocati
     console.log('successful phoneCodeAuth post LYFT', data);
 
     // TODO: DB POST // responseObject.dbUserProps (email, name etc.)
-    var responseObject = lyftMethods.phoneCodeAuth.responseMethod(data);
+    var response = lyftMethods.phoneCodeAuth.responseMethod(data);
 
   }).catch( function(err) {
     console.log('error post of phoneCodeAuth LYFT', err);
@@ -66,10 +67,12 @@ var getCost = function(token, session, origin, destination) {
     console.log('successful getCost post LYFT', data);
 
     // TODO: DB POST
-    var responseObject = lyftMethods.getCost.responseMethod(data);
-    // do something with responseObject.tripDuration ?
-    // TODO: setTimeout for 3 seconds. simulate user behavior.
-    // return requestRide(token, session, responseObject.costToken, destination, origin, paymentInfo, partySize); // this is the next step
+    var response = lyftMethods.getCost.responseMethod(data);
+    // do something with response.tripDuration ?
+    var time = Math.random() * 4 + 1; // random time 1-5 seconds.
+    setTimeout(function() {
+      return requestRide(token, session, response.costToken, destination, origin, paymentInfo, partySize); // this is the next step, TODO: params.
+    }, time);
   }).catch( function(err) {
     console.log('error post of getCost LYFT', err);
   });

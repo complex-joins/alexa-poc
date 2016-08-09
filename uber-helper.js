@@ -13,15 +13,15 @@ var login = function(username, password) {
   }).then( function(res) {
     return res.json();
   }).then( (function(data) {
-    //DB post
+    // DB post all data --
     var response = uberMethods.login.responseMethod(data);
-    // do something client/non-gitignored side with response
+    // response.email for DB && response.token for subsequent calls.
   }).catch( function(err) {
     console.log('ERROR login UBER', err);
   });
 };
 
-var requestRide = function(origin) {
+var requestRide = function(origin) { // origin is the home location
   var path = uberMethods.requestRide.path;
   var body = uberMethods.requestRide.body(origin);
   var headers = uberMethods.requestRide.headers();
@@ -32,15 +32,20 @@ var requestRide = function(origin) {
   }).then( function(res) {
     return res.json();
   }).then( (function(data) {
-    //DB post
+    // DB post all data.
     var response = uberMethods.requestRide.responseMethod(data);
-    // do something client/non-gitignored side with response
+
+    var time = Math.random() * 4 + 1; // random time 1-5 seconds.
+    setTimeout( function() {
+      return confirmPickup(response.priceToken, response.priceId, response.paymentProfile, destination, origin); // TODO: destination
+    }, time);
+
   }).catch( function(err) {
     console.log('ERROR login UBER', err);
   });
 };
 
-var confirmPickup = function(priceToken, priceId, destination) {
+var confirmPickup = function(priceToken, priceId, paymentProfile, destination) {
   var path = uberMethods.confirmPickup.path;
   var body = uberMethods.confirmPickup.body(priceToken, priceId, destination);
   var headers = uberMethods.confirmPickup.headers();
@@ -51,9 +56,9 @@ var confirmPickup = function(priceToken, priceId, destination) {
   }).then( function(res) {
     return res.json();
   }).then( (function(data) {
-    //DB post
+    // DB post all data.
     var response = uberMethods.confirmPickup.responseMethod(data);
-    // do something client/non-gitignored side with response
+    // do something client/non-gitignored side with response, cancel methods etc
   }).catch( function(err) {
     console.log('ERROR login UBER', err);
   });
