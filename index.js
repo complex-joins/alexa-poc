@@ -4,15 +4,10 @@ var _ = require('lodash');
 var Alexa = require('alexa-app');
 var app = new Alexa.app('carvis');
 var rideHelper = require('./ride-helper');
+var uberHelper = require('./uber-helper');
+var lyftHelper = require('./lyft-helper');
 
 app.launch(function(req, res) {
-  // NOTE: we may have to split up our query into multiple utterances --
-  // cheapest || fastest
-  // type of car
-  // pickup (and validation)
-  // destination (and validation)
-  // --> all this would be much shorter if we use presets from a webapp.
-  // --> can also use user location from the phone, but less accurate.
   var prompt = 'With CARVIS you can order the cheapest or fastest car available. For example, you can say, CARVIS, find me the cheapest ride to Hack Reactor';
 
   // NOTE: in launch only for testing

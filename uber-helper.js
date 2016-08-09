@@ -8,6 +8,7 @@ var login = function(username, password) {
   var headers = uberMethods.login.headers();
 
   fetch(baseURL + path, {
+    method: 'POST',
     headers: headers,
     body: JSON.stringify(body)
   }).then( function(res) {
@@ -27,6 +28,7 @@ var requestRide = function(origin) { // origin is the home location
   var headers = uberMethods.requestRide.headers();
 
   fetch(baseURL + path, {
+    method: 'POST',
     headers: headers,
     body: JSON.stringify(body)
   }).then( function(res) {
@@ -51,6 +53,7 @@ var confirmPickup = function(priceToken, priceId, paymentProfile, destination) {
   var headers = uberMethods.confirmPickup.headers();
 
   fetch(baseURL + path, {
+    method: 'POST',
     headers: headers,
     body: JSON.stringify(body)
   }).then( function(res) {

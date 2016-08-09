@@ -4,6 +4,30 @@ var baseURL = 'https://api.lyft.com/v1/'; // on which path is added.
 
 // TODO: database posts in each response -- with generic key naming.
 
+var refreshBearerToken = function() {
+
+
+  fetch('https://api.lyft.com/oauth/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Basic ' + lyftMethods.appConfig.appId + ':' + lyftMethods.appConfig.Secret
+    },
+    body: {
+      'grant_type': 'client_credentials',
+      'scope': 'public'
+    }
+  }).then(function(res) {
+    return res.json();
+  }).then(function(data) {
+    console.log('LYFT Bearer token success', data);
+    var lyftBearerToken = 'Bearer ' + data.access_token; //Header Authorization:
+    var expiration = data.expires_in; // 86400 seconds || 1 day.
+  }).catch(function(err) {
+    console.log('LYFT Bearer token error', err);
+  });
+};
+
 var lyftPhoneAuth = function(phoneNumberString) {
   var url = baseURL + lyftMethods.phoneAuth.path;
   var headers = lyftMethods.phoneAuth.headers; // or headers() ?
@@ -73,6 +97,7 @@ var getCost = function(token, session, origin, destination) {
     setTimeout(function() {
       return requestRide(token, session, response.costToken, destination, origin, paymentInfo, partySize); // this is the next step, TODO: params.
     }, time);
+
   }).catch( function(err) {
     console.log('error post of getCost LYFT', err);
   });
