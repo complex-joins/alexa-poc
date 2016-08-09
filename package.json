@@ -1,7 +1,7 @@
 {
-  "name": "airportinfo",
+  "name": "carvis",
   "version": "1.0.0",
-  "description": "track FAA Airport status",
+  "description": "Call A Ride Verbally, It's Simple",
   "main": "index.js",
   "scripts": {
     "test": "mocha test/"
@@ -10,11 +10,11 @@
   "license": "ISC",
   "dependencies": {
     "alexa-app": "^2.3.2",
+    "bluebird": "^3.4.1",
     "chai": "^3.5.0",
     "chai-as-promised": "^5.2.0",
     "lodash": "^4.3.0",
     "mocha": "^2.4.5",
-    "node-fetch": "^1.6.0",
-    "request-promise": "^2.0.0"
+    "node-fetch": "^1.6.0"
   }
 }

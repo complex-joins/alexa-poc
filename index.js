@@ -7,57 +7,99 @@ var rideHelper = require('./ride-helper');
 var uberHelper = require('./uber-helper');
 var lyftHelper = require('./lyft-helper');
 
+var prompt = 'With CARVIS you can order the cheapest or fastest car available. For example, you can say, CARVIS, find me the cheapest ride to Hack Reactor';
+var reprompt = 'Tell me to book the cheapest or fastest car, and where you want to go';
+
 app.launch(function(req, res) {
-  var prompt = 'With CARVIS you can order the cheapest or fastest car available. For example, you can say, CARVIS, find me the cheapest ride to Hack Reactor';
-
-  // NOTE: in launch only for testing
-  rideHelper.placesCall('stanford university', function(dest) {
-    rideHelper.getEstimate('cheapest', dest);
-  });
-  // ============================== //
-
-  res.say(prompt).reprompt(prompt).shouldEndSession(false);
+  res.say(prompt).reprompt(reprompt).shouldEndSession(false);
 });
 
 app.intent('GetEstimate', {
   'slots': {
     'MODE': 'MODE',
-    'DESTINATION': 'AMAZON.LITERAL'
+    'DESTINATION': 'DESTINATION',
+    'DESTINATION_ONE': 'DESTINATION_ONE',
   },
-  // TODO: configure these properly. also look into ./resources/*
+  'utterances': [
+    '{Find|Get|Order|Call|Book} {a|one|the|me the|me a} {MODE} {car|ride} to {DESTINATION}'
+  ]
 },
   function(req, res) {
-    var userId = request.userId; // the unique alexa session userId
-    console.log('userId:', userId);
-
+    var userId = req.userId; // the unique alexa session userId
     var mode = req.slot('MODE'); // cheapest or fastest
-    var reprompt = 'Tell me to book the cheapest or fastest car, and where you want to go';
+
+    // find the DESTINATION slot that is populated in this request
+    console.log('req.data.request.intent.slots', req.data.request.intent.slots);
+    var destination = _.filter(req.data.request.intent.slots, function(slotValue, slotKey) {
+      return (slotValue.value && slotValue.value.length > 0 && slotKey.includes('DESTINATION'));
+    })[0].value;
+    console.log('Alexa thinks my destination is', destination);
+
     // todo: grab user location?
-    if (_.isEmpty(mode)) {
-      var prompt = 'I didn\'t catch that. Please try again';
+    if (_.isEmpty(mode) || _.isEmpty(destination)) {
+      prompt = 'I didn\'t catch that. Please try again';
       res.say(prompt).reprompt(reprompt).shouldEndSession(false);
     } else {
-      // TODO: where does location come in?
-      // TODO: rideHelper.placesCall(place); -- once for pickup & destination?
-      // TODO: call rideHelper.getEstimate(mode);
+      rideHelper.placesCall(destination, function(placeDesc, destCoords) {
+        rideHelper.getEstimate(mode, destCoords, function(winner) {
+          var answer = formatAnswer(winner, mode, placeDesc);
+          res.say(answer).send();
+        });
+      });
 
-      // we need to include this to end session
-      res.say(prompt).reprompt(reprompt).shouldEndSession(true);
     }
+    // Intent handlers that don't return an immediate response (because they
+    // do some asynchronous operation) must return false
+    return false;
   }
 );
 
-// need to be included to pass Amazon reviews.
+// need to be included to pass Amazon reviews
 app.intent('AMAZON.StopIntent', exitFunction);
 app.intent('AMAZON.CancelIntent', exitFunction);
 app.intent('AMAZON.HelpIntent', helpFunction);
 
+var formatAnswer = function(winner, mode, placeDesc) {
+  mode = mode.includes('cheap') ? 'cheapest' : 'fastest';
+  var winnerEstimate;
+  var answer;
+
+  if (!winner) {
+    answer = 'There are no rides available to ${placeDesc}. Please try again.';
+    return _.template(answer)({
+      placeDesc: placeDesc
+    });
+  }
+
+  // convert estimate to $ or minutes
+  if (mode === 'fastest') {
+    var minutes = Math.floor(winner.estimate / 60);
+    winnerEstimate = minutes.toString() + ' minute';
+    winnerEstimate += minutes > 1 ? 's' : '';
+  } else {
+    var dollars = Math.floor(winner.estimate / 100);
+    var cents = winner.estimate % 100;
+    winnerEstimate = dollars.toString() + ' dollars';
+    winnerEstimate += (cents) ? ' and ' + cents.toString() + ' cents' : '';
+  }
+
+  answer = 'The ${mode} ride to ${placeDesc} is from ${winnerCompany}, with an estimate of ${winnerEstimate}';
+
+  return _.template(answer)({
+    mode: mode,
+    placeDesc: placeDesc,
+    winnerCompany: winner.company,
+    winnerEstimate: winnerEstimate
+  });
+};
+
 var exitFunction = function(req, res) {
-  var exitSpeech = 'Have a good one!';
+  var exitSpeech = 'Have a nice day!';
   res.say(exitSpeech);
 };
 var helpFunction = function(req, res) {
-  var helpSpeech = 'CARVIS finds you the cheapest and/or fastest rides to your destination.' + 'To begin, tell me to book the cheapest or fastest car, and where you want to go';
+  var helpSpeech = 'CARVIS finds you the cheapest and/or fastest ride to your destination. ';
+  helpSpeech += 'To begin, tell me to book the cheapest or fastest car, and where you want to go';
   res.say(helpSpeech);
 };
 
