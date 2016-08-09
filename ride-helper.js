@@ -73,7 +73,9 @@ var getEstimate = function(requestType, dest, cb, start) {
   }).then( function(data) {
     var uberEstimate;
 
-    if (uberPath === 'estimates/price') {
+    if (!data.prices) {
+      uberEstimate = -1;
+    } else if (uberPath === 'estimates/price') {
       var dollarsString = data.prices[0].estimate.slice(1);
       // TODO: make car type dynamic. right now hardcoded to POOL by using data.prices[0]
       uberEstimate = parseFloat(dollarsString) * 100;
@@ -104,7 +106,9 @@ var getEstimate = function(requestType, dest, cb, start) {
   }).then( function(data) {
     var lyftEstimate;
 
-    if (lyftPath === 'cost') {
+    if (!data.cost_estimates) {
+      lyftEstimate = -1;
+    } else if (lyftPath === 'cost') {
       lyftEstimate = Number(data.cost_estimates[0].estimated_cost_cents_max);
     } else if (lyftPath === 'eta') {
       lyftEstimate = data.eta_estimates[0].eta_seconds;
@@ -123,10 +127,18 @@ var getEstimate = function(requestType, dest, cb, start) {
   });
 
   var compare = function(uberEstimate, lyftEstimate) {
-    return uberEstimate < lyftEstimate ? { 'company': 'Uber', 'estimate': uberEstimate }
-      : { 'company': 'Lyft', 'estimate': lyftEstimate };
+    var uberAsWinner = { 'company': 'Uber', 'estimate': uberEstimate };
+    var lyftAsWinner = { 'company': 'Lyft', 'estimate': lyftEstimate };
+    if (uberEstimate < 0 && lyftEstimate) {
+      return lyftAsWinner;
+    } else if (lyftEstimate < 0 && uberEstimate) {
+      return uberAsWinner;
+    }
+
+    return uberEstimate < lyftEstimate ? uberAsWinner : lyftAsWinner;
     // TODO: what if they are equal? check the other dimension as well
     // if that is also equal, return one randomly?
+    // what if both estimates are null
   };
 
 };
