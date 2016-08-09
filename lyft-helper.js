@@ -97,3 +97,10 @@ var requestRide = function(token, session, costToken, destination, origin, payme
     console.log('error post of requestRide LYFT', err);
   });
 };
+
+module.exports = {
+  lyftPhoneAuth: lyftPhoneAuth,
+  lyftPhoneCodeAuth: lyftPhoneCodeAuth,
+  getCost: getCost,
+  requestRide: requestRide
+}
