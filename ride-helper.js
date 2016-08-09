@@ -3,6 +3,9 @@ var fetch = require('node-fetch');
 fetch.Promise = require('bluebird');
 var placesCall = require('./place-helper'); // invoked as placesCall();
 
+// TODO: update dynamically - see config.js
+var lyftToken = require('./config/config').LYFT_BEARER_TOKEN;
+
 var getEstimate = function(requestType, dest, cb, start) {
   var uberURL = 'https://api.uber.com/v1/';
   var lyftURL = 'https://api.lyft.com/v1/';
@@ -41,16 +44,7 @@ var getEstimate = function(requestType, dest, cb, start) {
     dest1: dest[1]
   });
 
-  // currently hardcoded and needs to be updated ~daily
-  // TODO: update dynamically
-  var lyftToken = 'Bearer gAAAAABXqCzO85dDTZB20xCniXi9SGQPUARF3-Zzmh7haAmV5pZs6pKwADhRMBRWATEmt1crY73Cst7Q9Kwrvd5WeN6YJy7NTl-t7_kTJQDXvr6tQ4MVA6H4nCtTs5Oi1iFW_f7SAgQmeb6X5Lz9gmtywCMaQYcRDxZ8biE4Ik5lCzMxdxz2dRKQGOBLMfNVT98cuMoRBhwBTAUceT3Rj6VSw_0AqVKcBQ==';
-
-  /* update via:
-  curl -X POST -H "Content-Type: application/json" \
-     --user "nhgXNFoIrr4Q:sinLMosFWSD9OiwgfnSEm3WN8y5Jd_0n" \
-     -d '{"grant_type": "client_credentials", "scope": "public"}' \
-     'https://api.lyft.com/oauth/token'
-  */
+  lyftToken = 'Bearer ' + lyftToken;
 
   var firstResult = null;
   var winner = null;
