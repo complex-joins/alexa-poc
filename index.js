@@ -22,7 +22,8 @@ app.launch(function(req, res) {
 app.intent('GetEstimate', {
   'slots': {
     'MODE': 'MODE',
-    'DESTINATION': 'AMAZON.LITERAL'
+    'DESTINATION': 'DESTINATION',
+    'DESTINATION_ONE': 'DESTINATION_ONE',
   },
   'utterances': [
     '{Find|Get|Order|Call|Book} {a|one|the|me the|me a} {MODE} {car|ride} {to | DESTINATION}'
@@ -33,15 +34,23 @@ app.intent('GetEstimate', {
     console.log('userId:', userId);
 
     var mode = req.slot('MODE'); // cheapest or fastest
-    var destination = req.slot('DESTINATION');
+    
+    // var destination = req.slot('DESTINATION');
+    // instead of above, find the populated slot that starts with DESTINATION
+    console.log('req.data.request.intent.slots', req.data.request.intent.slots);
+    var destination = _.filter(req.data.request.intent.slots, function(slotValue, slotKey) {
+      return (slotValue.value && slotValue.value.length > 0 && slotKey.includes('DESTINATION'));
+    })[0].value;
+    console.log('alexa thinks my destination is', destination);
+
     // todo: grab user location?
     if (_.isEmpty(mode) || _.isEmpty(destination)) {
       prompt = 'I didn\'t catch that. Please try again';
       res.say(prompt).reprompt(reprompt).shouldEndSession(false);
     } else {
-      rideHelper.placesCall(destination, function(destCoords) {
+      rideHelper.placesCall(destination, function(placeDesc, destCoords) {
         rideHelper.getEstimate(mode, destCoords, function(winner) {
-          var answer = formatAnswer(winner, mode);
+          var answer = formatAnswer(winner, mode, placeDesc);
           res.say(answer).send();
         });
       });
@@ -58,10 +67,17 @@ app.intent('AMAZON.StopIntent', exitFunction);
 app.intent('AMAZON.CancelIntent', exitFunction);
 app.intent('AMAZON.HelpIntent', helpFunction);
 
-var formatAnswer = function(winner, mode) {
-  var answer = `The ${mode} ride is from ${winner.company}, with an estimate of ${winner.estimate} `;
-  answer += (mode === 'cheapest') ? 'cents' : 'seconds';
-  return answer;
+var formatAnswer = function(winner, mode, placeDesc) {
+  mode = mode.includes('cheap') ? 'cheapest' : 'fastest';
+  var answer = 'The ${mode} ride to ${placeDesc} is from ${winnerCompany}, with an estimate of ${winnerEstimate} ';
+  answer += ( mode.includes('cheap') ) ? 'cents' : 'seconds';
+
+  return _.template(answer)({
+    mode: mode,
+    placeDesc: placeDesc,
+    winnerCompany: winner.company,
+    winnerEstimate: winner.estimate
+  });
 };
 
 var exitFunction = function(req, res) {

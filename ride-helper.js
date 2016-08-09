@@ -1,4 +1,6 @@
+var _ = require('lodash');
 var fetch = require('node-fetch');
+fetch.Promise = require('bluebird');
 var placesCall = require('./place-helper'); // invoked as placesCall();
 
 // NOTE: refactor could be that one first does the placesCall in index.js or here, and on return of coordinates fire the getEstimate.
@@ -14,19 +16,38 @@ var getEstimate = function(requestType, dest, cb, start) {
   start = start || [37.7773563, -122.3968629]; // Shez's house
   dest = dest || [37.7836966, -122.4111551]; // HR
 
-  if (requestType === 'cheapest') {
+  if (requestType.includes('cheap')) {
     uberPath = 'estimates/price';
     lyftPath = 'cost';
-  } else if (requestType === 'fastest') {
+  } else if (requestType.includes('fast')) {
     uberPath = 'estimates/time';
     lyftPath = 'eta';
   }
 
-  var uberEndpoint = `${uberURL}${uberPath}?start_latitude=${start[0]}&start_longitude=${start[1]}&end_latitude=${dest[0]}&end_longitude=${dest[1]}`;
-  var lyftEndpoint = `${lyftURL}${lyftPath}?lat=${start[0]}&lng=${start[1]}&start_lat=${start[0]}&start_lng=${start[1]}&end_lat=${dest[0]}&end_lng=${dest[1]}`;
+  var uberEndpoint = '${uberURL}${uberPath}?start_latitude=${start0}&start_longitude=${start1}&end_latitude=${dest0}&end_longitude=${dest1}';
+  var lyftEndpoint = '${lyftURL}${lyftPath}?lat=${start0}&lng=${start1}&start_lat=${start0}&start_lng=${start1}&end_lat=${dest0}&end_lng=${dest1}';
+
+  uberEndpoint = _.template(uberEndpoint)({
+    uberURL: uberURL,
+    uberPath: uberPath,
+    start0: start[0],
+    start1: start[1],
+    dest0: dest[0],
+    dest1: dest[1]
+  });
+
+  lyftEndpoint = _.template(lyftEndpoint)({
+    lyftURL: lyftURL,
+    lyftPath: lyftPath,
+    start0: start[0],
+    start1: start[1],
+    dest0: dest[0],
+    dest1: dest[1]
+  });
 
   // currently hardcoded and needs to be updated ~daily
-  var lyftToken = 'Bearer gAAAAABXpjQCisq76Eoa-rY_t503fGT6xAZhAaq1j3HI3-MUjlKowWsskhWQXmsw2CKRGT_f6oVW-xNYXE75kjltjfx7WitbXj70UX8Tzps55xDGcHQPI2NpPtdx23EcDbqh6f-zlU50g9sUV7Mey5EMyLi2H1tYrsVik0c3sXz63tDxqbj8aR650diL0mOEP1Az5BPJnkywmUTY6dllo4hB5Aixv8VDfA==';
+  // TODO: update dynamically
+  var lyftToken = 'Bearer gAAAAABXqCzO85dDTZB20xCniXi9SGQPUARF3-Zzmh7haAmV5pZs6pKwADhRMBRWATEmt1crY73Cst7Q9Kwrvd5WeN6YJy7NTl-t7_kTJQDXvr6tQ4MVA6H4nCtTs5Oi1iFW_f7SAgQmeb6X5Lz9gmtywCMaQYcRDxZ8biE4Ik5lCzMxdxz2dRKQGOBLMfNVT98cuMoRBhwBTAUceT3Rj6VSw_0AqVKcBQ==';
 
   /* update via:
   curl -X POST -H "Content-Type: application/json" \
