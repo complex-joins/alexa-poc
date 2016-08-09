@@ -82,7 +82,8 @@ var formatAnswer = function(winner, mode, placeDesc) {
   // convert estimate to $ or minutes
   if (mode === 'fastest') {
     var minutes = Math.floor(winner.estimate / 60);
-    winnerEstimate = minutes.toString() + ' minutes';
+    winnerEstimate = minutes.toString() + ' minute';
+    winnerEstimate += minutes > 1 ? 's' : '';
   } else {
     var dollars = Math.floor(winner.estimate / 100);
     var cents = winner.estimate % 100;
