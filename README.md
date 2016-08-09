@@ -1,11 +1,14 @@
-###Completed solution for the blog article "Developing Alexa Skills Locally with Node.js"
+# Carvis
 
-part 1: [https://www.bignerdranch.com/blog/developing-alexa-skills-locally-with-nodejs-setting-up-your-local-environment/](https://www.bignerdranch.com/blog/developing-alexa-skills-locally-with-nodejs-setting-up-your-local-environment/)
-part 2: [https://www.bignerdranch.com/blog/developing-alexa-skills-locally-with-nodejs-implementing-an-intent-with-alexa-app-and-alexa-app-server/](https://www.bignerdranch.com/blog/developing-alexa-skills-locally-with-nodejs-implementing-an-intent-with-alexa-app-and-alexa-app-server/)
+Proof of concept app for the Carvis alexa skill.
 
-Node is required to run the test suite(the article will guide you on getting set up #add link). 
-To run the tests once you have installed node: 
+## How to run this app
+`npm install` and `node server` in the folder above this (app server).
 
-  - npm install
-  - npm test
+## Issues
 
+## Architecture
+- Carvis runs on AWS with DockerCloud and DockerHub.
+- Testing: Karma, Mocha, Chai, TravisCI.
+- Node, Express, React, PostgreSQL, Redis
+- Reverse engineering: Charles Proxy, SSL Kill Switch 2, APK Extraktor, APKtool.
