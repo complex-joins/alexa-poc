@@ -73,13 +73,18 @@ var getEstimate = function(requestType, dest, cb, start) {
   }).then( function(data) {
     var uberEstimate;
 
-    if (!data.prices) {
-      uberEstimate = -1;
-    } else if (uberPath === 'estimates/price') {
-      var dollarsString = data.prices[0].estimate.slice(1);
-      // TODO: make car type dynamic. right now hardcoded to POOL by using data.prices[0]
-      uberEstimate = parseFloat(dollarsString) * 100;
+    if (uberPath === 'estimates/price') {
+      if (!data.prices) {
+        uberEstimate = -1;  
+      } else {
+        var dollarsString = data.prices[0].estimate.slice(1);
+        // TODO: make car type dynamic. right now hardcoded to POOL by using data.prices[0]
+        uberEstimate = parseFloat(dollarsString) * 100;  
+      }
     } else if (uberPath === 'estimates/time') {
+      // TODO: make calls to BOTH time and price and return both to alexa as details
+      // esp since uber will still give a time estimate even when there's no valid fare
+      // (ex: destination = 'gardendale')
       uberEstimate = data.times[0].estimate;
     }
 
@@ -106,11 +111,16 @@ var getEstimate = function(requestType, dest, cb, start) {
   }).then( function(data) {
     var lyftEstimate;
 
-    if (!data.cost_estimates) {
-      lyftEstimate = -1;
-    } else if (lyftPath === 'cost') {
-      lyftEstimate = Number(data.cost_estimates[0].estimated_cost_cents_max);
+    if (lyftPath === 'cost') {
+      if (!data.cost_estimates || !data.cost_estimates[0].estimated_cost_cents_max) {
+        lyftEstimate = -1;
+      } else {
+        lyftEstimate = parseFloat(data.cost_estimates[0].estimated_cost_cents_max);
+      }
     } else if (lyftPath === 'eta') {
+      // TODO: make calls to BOTH time and price and return both to alexa as details
+      // esp since lyft will still give a time estimate even when there's no valid fare
+      // (ex: destination = 'gardendale')
       lyftEstimate = data.eta_estimates[0].eta_seconds;
     }
 
@@ -129,16 +139,17 @@ var getEstimate = function(requestType, dest, cb, start) {
   var compare = function(uberEstimate, lyftEstimate) {
     var uberAsWinner = { 'company': 'Uber', 'estimate': uberEstimate };
     var lyftAsWinner = { 'company': 'Lyft', 'estimate': lyftEstimate };
-    if (uberEstimate < 0 && lyftEstimate) {
+    if (uberEstimate < 0 && lyftEstimate > 0) {
       return lyftAsWinner;
-    } else if (lyftEstimate < 0 && uberEstimate) {
+    } else if (lyftEstimate < 0 && uberEstimate > 0) {
       return uberAsWinner;
+    } else if (uberEstimate < 0 && lyftEstimate < 0) {
+      return null;
     }
 
     return uberEstimate < lyftEstimate ? uberAsWinner : lyftAsWinner;
     // TODO: what if they are equal? check the other dimension as well
     // if that is also equal, return one randomly?
-    // what if both estimates are null
   };
 
 };

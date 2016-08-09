@@ -70,10 +70,18 @@ app.intent('AMAZON.HelpIntent', helpFunction);
 var formatAnswer = function(winner, mode, placeDesc) {
   mode = mode.includes('cheap') ? 'cheapest' : 'fastest';
   var winnerEstimate;
+  var answer;
 
+  if (!winner) {
+    answer = 'There are no rides available to ${placeDesc}. Please try again.';
+    return _.template(answer)({
+      placeDesc: placeDesc
+    });
+  }
+  
   // convert estimate to $ or minutes
   if (mode === 'fastest') {
-    var minutes = winner.estimate / 60;
+    var minutes = Math.floor(winner.estimate / 60);
     winnerEstimate = minutes.toString() + ' minutes';
   } else {
     var dollars = Math.floor(winner.estimate / 100);
@@ -82,7 +90,7 @@ var formatAnswer = function(winner, mode, placeDesc) {
     winnerEstimate += (cents) ? ' and ' + cents.toString() + ' cents' : '';
   }
 
-  var answer = 'The ${mode} ride to ${placeDesc} is from ${winnerCompany}, with an estimate of ${winnerEstimate}';
+  answer = 'The ${mode} ride to ${placeDesc} is from ${winnerCompany}, with an estimate of ${winnerEstimate}';
 
   return _.template(answer)({
     mode: mode,
