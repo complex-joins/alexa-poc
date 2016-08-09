@@ -103,4 +103,4 @@ module.exports = {
   lyftPhoneCodeAuth: lyftPhoneCodeAuth,
   getCost: getCost,
   requestRide: requestRide
-}
+};
