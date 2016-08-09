@@ -15,7 +15,6 @@ var placesCall = function(place, cb) {
   }).then( function(data) {
     var placeDesc = data.predictions[0].description;
     console.log('Place found:', placeDesc);
-    // console.log('place details:', data.predictions);
     // TODO: filter out place results with distance from home > 100 miles
     var placeId = data.predictions[0].place_id;
     var detailURL = 'https://maps.googleapis.com/maps/api/place/details/json?placeid=${placeId}&key=${key}';
@@ -31,7 +30,7 @@ var placesCall = function(place, cb) {
       var placeLong = data.result.geometry.location.lng;
       var routableAddress = data.result.formatted_address;
       // ie. "48 Pirrama Road, Pyrmont NSW, Australia"
-      // NOTE: we need this in for both origin and destination.
+      // NOTE: we need this for both origin and destination.
       // store this somewhere ? 
 
       cb(placeDesc, [placeLat, placeLong]);

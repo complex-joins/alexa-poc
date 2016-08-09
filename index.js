@@ -9,13 +9,6 @@ var prompt = 'With CARVIS you can order the cheapest or fastest car available. F
 var reprompt = 'Tell me to book the cheapest or fastest car, and where you want to go';
 
 app.launch(function(req, res) {
-  // NOTE: we may have to split up our query into multiple utterances --
-  // cheapest || fastest
-  // type of car
-  // pickup (and validation)
-  // destination (and validation)
-  // --> all this would be much shorter if we use presets from a webapp.
-  // --> can also use user location from the phone, but less accurate.
   res.say(prompt).reprompt(reprompt).shouldEndSession(false);
 });
 
@@ -26,22 +19,19 @@ app.intent('GetEstimate', {
     'DESTINATION_ONE': 'DESTINATION_ONE',
   },
   'utterances': [
-    '{Find|Get|Order|Call|Book} {a|one|the|me the|me a} {MODE} {car|ride} {to | DESTINATION}'
+    '{Find|Get|Order|Call|Book} {a|one|the|me the|me a} {MODE} {car|ride} to {DESTINATION}'
   ]
 },
   function(req, res) {
     var userId = req.userId; // the unique alexa session userId
-    console.log('userId:', userId);
-
     var mode = req.slot('MODE'); // cheapest or fastest
     
-    // var destination = req.slot('DESTINATION');
-    // instead of above, find the populated slot that starts with DESTINATION
+    // find the DESTINATION slot that is populated in this request
     console.log('req.data.request.intent.slots', req.data.request.intent.slots);
     var destination = _.filter(req.data.request.intent.slots, function(slotValue, slotKey) {
       return (slotValue.value && slotValue.value.length > 0 && slotKey.includes('DESTINATION'));
     })[0].value;
-    console.log('alexa thinks my destination is', destination);
+    console.log('Alexa thinks my destination is', destination);
 
     // todo: grab user location?
     if (_.isEmpty(mode) || _.isEmpty(destination)) {
@@ -62,7 +52,7 @@ app.intent('GetEstimate', {
   }
 );
 
-// need to be included to pass Amazon reviews.
+// need to be included to pass Amazon reviews
 app.intent('AMAZON.StopIntent', exitFunction);
 app.intent('AMAZON.CancelIntent', exitFunction);
 app.intent('AMAZON.HelpIntent', helpFunction);
@@ -102,11 +92,12 @@ var formatAnswer = function(winner, mode, placeDesc) {
 };
 
 var exitFunction = function(req, res) {
-  var exitSpeech = 'Have a good one!';
+  var exitSpeech = 'Have a nice day!';
   res.say(exitSpeech);
 };
 var helpFunction = function(req, res) {
-  var helpSpeech = 'CARVIS finds you the cheapest and/or fastest rides to your destination.' + 'To begin, tell me to book the cheapest or fastest car, and where you want to go';
+  var helpSpeech = 'CARVIS finds you the cheapest and/or fastest ride to your destination. ';
+  helpSpeech += 'To begin, tell me to book the cheapest or fastest car, and where you want to go';
   res.say(helpSpeech);
 };
 

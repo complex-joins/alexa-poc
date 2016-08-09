@@ -3,10 +3,7 @@ var fetch = require('node-fetch');
 fetch.Promise = require('bluebird');
 var placesCall = require('./place-helper'); // invoked as placesCall();
 
-// NOTE: refactor could be that one first does the placesCall in index.js or here, and on return of coordinates fire the getEstimate.
-
 var getEstimate = function(requestType, dest, cb, start) {
-  // take input 'requestType' that will either be 'fastest' or 'cheapest'
   var uberURL = 'https://api.uber.com/v1/';
   var lyftURL = 'https://api.lyft.com/v1/';
 
@@ -14,7 +11,6 @@ var getEstimate = function(requestType, dest, cb, start) {
   var lyftPath;
 
   start = start || [37.7773563, -122.3968629]; // Shez's house
-  dest = dest || [37.7836966, -122.4111551]; // HR
 
   if (requestType.includes('cheap')) {
     uberPath = 'estimates/price';
@@ -56,9 +52,6 @@ var getEstimate = function(requestType, dest, cb, start) {
      'https://api.lyft.com/oauth/token'
   */
 
-  // TODO: refactor index.js to pass a requestType based on user intent
-  // return alexa speech based on comparison result
-
   var firstResult = null;
   var winner = null;
 
@@ -82,7 +75,7 @@ var getEstimate = function(requestType, dest, cb, start) {
         uberEstimate = parseFloat(dollarsString) * 100;  
       }
     } else if (uberPath === 'estimates/time') {
-      // TODO: make calls to BOTH time and price and return both to alexa as details
+      // TODO: always make calls to BOTH time and price and return both to alexa as details
       // esp since uber will still give a time estimate even when there's no valid fare
       // (ex: destination = 'gardendale')
       uberEstimate = data.times[0].estimate;
@@ -126,7 +119,7 @@ var getEstimate = function(requestType, dest, cb, start) {
 
     if (firstResult) {
       winner = compare(firstResult, lyftEstimate);
-      console.log('winner:', winner);
+      console.log('Winner:', winner);
       cb(winner);
     } else {
       firstResult = lyftEstimate;
@@ -148,8 +141,8 @@ var getEstimate = function(requestType, dest, cb, start) {
     }
 
     return uberEstimate < lyftEstimate ? uberAsWinner : lyftAsWinner;
-    // TODO: what if they are equal? check the other dimension as well
-    // if that is also equal, return one randomly?
+    // TODO: what if prices/times are equal? check times/prices as well
+    // if that is also equal, return one randomly
   };
 
 };
