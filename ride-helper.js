@@ -3,7 +3,7 @@ var fetch = require('node-fetch');
 fetch.Promise = require('bluebird');
 var placesCall = require('./place-helper'); // invoked as placesCall();
 
-var getEstimate = function(requestType, dest, cb, start) {
+var getEstimate = function (requestType, dest, cb, start) {
   var uberURL = 'https://api.uber.com/v1/';
   var lyftURL = 'https://api.lyft.com/v1/';
 
@@ -56,80 +56,86 @@ var getEstimate = function(requestType, dest, cb, start) {
   var winner = null;
 
   fetch(uberEndpoint, {
-    method: 'GET',
-    headers: {
-      Authorization: 'Token pG-f76yk_TFCTMHtYHhY7xUfLVwmt9u-l4gmgiHE',
-      'Content-Type': 'application/json'
-    }
-  }).then( function(res) {
-    return res.json();
-  }).then( function(data) {
-    var uberEstimate;
-
-    if (uberPath === 'estimates/price') {
-      if (!data.prices) {
-        uberEstimate = -1;  
-      } else {
-        var dollarsString = data.prices[0].estimate.slice(1);
-        // TODO: make car type dynamic. right now hardcoded to POOL by using data.prices[0]
-        uberEstimate = parseFloat(dollarsString) * 100;  
+      method: 'GET',
+      headers: {
+        Authorization: 'Token pG-f76yk_TFCTMHtYHhY7xUfLVwmt9u-l4gmgiHE',
+        'Content-Type': 'application/json'
       }
-    } else if (uberPath === 'estimates/time') {
-      // TODO: always make calls to BOTH time and price and return both to alexa as details
-      // esp since uber will still give a time estimate even when there's no valid fare
-      // (ex: destination = 'gardendale')
-      uberEstimate = data.times[0].estimate;
-    }
+    })
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (data) {
+      var uberEstimate;
 
-    if (firstResult) {
-      winner = compare(uberEstimate, firstResult);
-      console.log('Winner:', winner);
-      cb(winner);
-    } else {
-      firstResult = uberEstimate;
-    }
-    console.log('Uber Pool estimate:', uberEstimate);
-  }).catch( function(err) {
-    console.log('error in uber fetch', err);
-  });
+      if (uberPath === 'estimates/price') {
+        if (!data.prices) {
+          uberEstimate = -1;
+        } else {
+          var dollarsString = data.prices[0].estimate.slice(1);
+          // TODO: make car type dynamic. right now hardcoded to POOL by using data.prices[0]
+          uberEstimate = parseFloat(dollarsString) * 100;
+        }
+      } else if (uberPath === 'estimates/time') {
+        // TODO: always make calls to BOTH time and price and return both to alexa as details
+        // esp since uber will still give a time estimate even when there's no valid fare
+        // (ex: destination = 'gardendale')
+        uberEstimate = data.times[0].estimate;
+      }
+
+      if (firstResult) {
+        winner = compare(uberEstimate, firstResult);
+        console.log('Winner:', winner);
+        cb(winner);
+      } else {
+        firstResult = uberEstimate;
+      }
+      console.log('Uber Pool estimate:', uberEstimate);
+    })
+    .catch(function (err) {
+      console.log('error in uber fetch', err);
+    });
 
   fetch(lyftEndpoint, {
-    method: 'GET',
-    headers: {
-      Authorization: lyftToken,
-      'Content-Type': 'application/json'
-    }
-  }).then( function(res) {
-    return res.json();
-  }).then( function(data) {
-    var lyftEstimate;
-
-    if (lyftPath === 'cost') {
-      if (!data.cost_estimates || !data.cost_estimates[0].estimated_cost_cents_max) {
-        lyftEstimate = -1;
-      } else {
-        lyftEstimate = parseFloat(data.cost_estimates[0].estimated_cost_cents_max);
+      method: 'GET',
+      headers: {
+        Authorization: lyftToken,
+        'Content-Type': 'application/json'
       }
-    } else if (lyftPath === 'eta') {
-      // TODO: make calls to BOTH time and price and return both to alexa as details
-      // esp since lyft will still give a time estimate even when there's no valid fare
-      // (ex: destination = 'gardendale')
-      lyftEstimate = data.eta_estimates[0].eta_seconds;
-    }
+    })
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (data) {
+      var lyftEstimate;
 
-    if (firstResult) {
-      winner = compare(firstResult, lyftEstimate);
-      console.log('Winner:', winner);
-      cb(winner);
-    } else {
-      firstResult = lyftEstimate;
-    }
-    console.log('Lyft Line estimate:', lyftEstimate);
-  }).catch( function(err) {
-    console.log('error in lyft fetch', err);
-  });
+      if (lyftPath === 'cost') {
+        if (!data.cost_estimates || !data.cost_estimates[0].estimated_cost_cents_max) {
+          lyftEstimate = -1;
+        } else {
+          lyftEstimate = parseFloat(data.cost_estimates[0].estimated_cost_cents_max);
+        }
+      } else if (lyftPath === 'eta') {
+        // TODO: make calls to BOTH time and price and return both to alexa as details
+        // esp since lyft will still give a time estimate even when there's no valid fare
+        // (ex: destination = 'gardendale')
+        lyftEstimate = data.eta_estimates[0].eta_seconds;
+      }
 
-  var compare = function(uberEstimate, lyftEstimate) {
+      if (firstResult) {
+        winner = compare(firstResult, lyftEstimate);
+        console.log('Winner:', winner);
+        cb(winner);
+      } else {
+        firstResult = lyftEstimate;
+      }
+      console.log('Lyft Line estimate:', lyftEstimate);
+    })
+    .catch(function (err) {
+      console.log('error in lyft fetch', err);
+    });
+
+  var compare = function (uberEstimate, lyftEstimate) {
     var uberAsWinner = { 'company': 'Uber', 'estimate': uberEstimate };
     var lyftAsWinner = { 'company': 'Lyft', 'estimate': lyftEstimate };
     if (uberEstimate < 0 && lyftEstimate > 0) {
