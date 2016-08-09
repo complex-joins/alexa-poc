@@ -4,6 +4,7 @@ var _ = require('lodash');
 var Alexa = require('alexa-app');
 var app = new Alexa.app('carvis');
 var rideHelper = require('./ride-helper');
+var staging = true;
 
 var prompt = 'With CARVIS you can order the cheapest or fastest car available. For example, you can say, CARVIS, find me the cheapest ride to Hack Reactor';
 var reprompt = 'Tell me to book the cheapest or fastest car, and where you want to go';
@@ -75,13 +76,19 @@ var formatAnswer = function(winner, mode, placeDesc) {
     winnerEstimate = minutes.toString() + ' minute';
     winnerEstimate += minutes > 1 ? 's' : '';
   } else {
+    winner.estimate = (staging) ? winner.estimate * 2 : winner.estimate;
     var dollars = Math.floor(winner.estimate / 100);
     var cents = winner.estimate % 100;
     winnerEstimate = dollars.toString() + ' dollars';
     winnerEstimate += (cents) ? ' and ' + cents.toString() + ' cents' : '';
   }
 
-  answer = 'The ${mode} ride to ${placeDesc} is from ${winnerCompany}, with an estimate of ${winnerEstimate}';
+  if (staging) {
+    // answer = 'A taxi from ${originDesc} to ${destinationDesc} will cost an average of ${winnerEstimate}';
+    answer = 'A taxi to ${placeDesc} will cost an average of ${winnerEstimate}';
+  } else {
+    answer = 'The ${mode} ride to ${placeDesc} is from ${winnerCompany}, with an estimate of ${winnerEstimate}';    
+  }
 
   return _.template(answer)({
     mode: mode,
