@@ -15,7 +15,8 @@ if (staging) {
   utterances = ['How much is a {car|ride|taxi} from {ORIGIN} to {DESTINATION}'];
   
   slots = {
-    'ORIGIN': 'ORIGIN',
+    'ORIGIN': 'DESTINATION',
+    'ORIGIN_ONE': 'DESTINATION_ONE',
     'DESTINATION': 'DESTINATION',
     'DESTINATION_ONE': 'DESTINATION_ONE',
   };
@@ -47,7 +48,11 @@ app.intent('GetEstimate', {
     var userId = req.userId; // the unique alexa session userId
     var mode = (staging) ? 'cheapest' : req.slot('MODE'); // cheapest or fastest
 
-    var origin = req.slot('ORIGIN') || null;
+    // find the ORIGIN slot that is populated in this request, if any
+    var originArray = _.filter(slots, function(slotValue, slotKey) {
+      return (slotValue.value && slotValue.value.length > 0 && slotKey.includes('ORIGIN'));
+    });
+    var origin = (originArray.length) ? originArray[0].value : null;
     console.log('Alexa thinks my origin is', origin);
 
     // find the DESTINATION slot that is populated in this request
