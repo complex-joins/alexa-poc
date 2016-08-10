@@ -29,6 +29,7 @@ config/config.js
 lyftPrivateMethods.js
 uberPrivateMethods.js
 uberPrivateAPIresponses.js
+anotherConfig.js
 
 # =========================
 # Operating System Files

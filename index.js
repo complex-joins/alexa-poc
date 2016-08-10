@@ -13,7 +13,7 @@ if (staging) {
   reprompt = 'Tell me where you want to be picked up, and where you want to go';
   helpSpeech = prompt;
   utterances = ['How much is a {car|ride|taxi} from {ORIGIN} to {DESTINATION}'];
-  
+
   slots = {
     'ORIGIN': 'DESTINATION',
     'ORIGIN_ONE': 'DESTINATION_ONE',
@@ -34,29 +34,31 @@ if (staging) {
   };
 }
 
-app.launch(function(req, res) {
-  res.say(prompt).reprompt(reprompt).shouldEndSession(false);
+app.launch(function (req, res) {
+  res.say(prompt)
+    .reprompt(reprompt)
+    .shouldEndSession(false);
 });
 
 app.intent('GetEstimate', {
-  'slots': slots,
-  'utterances': utterances
-},
-  function(req, res) {
+    'slots': slots,
+    'utterances': utterances
+  },
+  function (req, res) {
     var slots = req.data.request.intent.slots;
     console.log('slots:', slots);
     var userId = req.userId; // the unique alexa session userId
     var mode = (staging) ? 'cheapest' : req.slot('MODE'); // cheapest or fastest
 
     // find the ORIGIN slot that is populated in this request, if any
-    var originArray = _.filter(slots, function(slotValue, slotKey) {
+    var originArray = _.filter(slots, function (slotValue, slotKey) {
       return (slotValue.value && slotValue.value.length > 0 && slotKey.includes('ORIGIN'));
     });
     var origin = (originArray.length) ? originArray[0].value : null;
     console.log('Alexa thinks my origin is', origin);
 
     // find the DESTINATION slot that is populated in this request
-    var destination = _.filter(slots, function(slotValue, slotKey) {
+    var destination = _.filter(slots, function (slotValue, slotKey) {
       return (slotValue.value && slotValue.value.length > 0 && slotKey.includes('DESTINATION'));
     })[0].value;
     console.log('Alexa thinks my destination is', destination);
@@ -64,20 +66,23 @@ app.intent('GetEstimate', {
     // todo: grab user location?
     if (_.isEmpty(mode) || _.isEmpty(destination)) {
       prompt = 'I didn\'t catch that. Please try again';
-      res.say(prompt).reprompt(reprompt).shouldEndSession(false);
+      res.say(prompt)
+        .reprompt(reprompt)
+        .shouldEndSession(false);
     } else {
       var originDescrip, destDescrip, originCoords, destCoords;
 
       if (origin) {
         // get originDescrip and originCoords for origin that was passed in
-        rideHelper.placesCall(origin, function(descrip, coords) {
+        rideHelper.placesCall(origin, function (descrip, coords) {
           originDescrip = descrip;
           originCoords = coords;
           if (destDescrip) {
             // make getEstimate call since destDescrip async call resolved first
-            rideHelper.getEstimate(mode, originCoords, destCoords, function(winner) {
+            rideHelper.getEstimate(mode, originCoords, destCoords, function (winner) {
               var answer = formatAnswer(winner, mode, originDescrip, destDescrip);
-              res.say(answer).send();
+              res.say(answer)
+                .send();
             });
           }
         });
@@ -87,19 +92,20 @@ app.intent('GetEstimate', {
         originCoords = [37.7773563, -122.3968629]; // Shez's house
       }
 
-      rideHelper.placesCall(destination, function(descrip, coords) {
+      rideHelper.placesCall(destination, function (descrip, coords) {
         destDescrip = descrip;
         destCoords = coords;
         if (originDescrip) {
           // make getEstimate call since originDescrip async call resolved first
-          rideHelper.getEstimate(mode, originCoords, destCoords, function(winner) {
+          rideHelper.getEstimate(mode, originCoords, destCoords, function (winner) {
             var answer = formatAnswer(winner, mode, originDescrip, destDescrip);
-            res.say(answer).send();
+            res.say(answer)
+              .send();
           });
         }
       });
     }
-    // Intent handlers that don't return an immediate response (because they 
+    // Intent handlers that don't return an immediate response (because they
     // do some asynchronous operation) must return false
     return false;
   }
@@ -110,7 +116,7 @@ app.intent('AMAZON.StopIntent', exitFunction);
 app.intent('AMAZON.CancelIntent', exitFunction);
 app.intent('AMAZON.HelpIntent', helpFunction);
 
-var formatAnswer = function(winner, mode, originDescrip, destDescrip) {
+var formatAnswer = function (winner, mode, originDescrip, destDescrip) {
   mode = mode.includes('cheap') ? 'cheapest' : 'fastest';
   var winnerEstimate, answer;
 
@@ -120,7 +126,7 @@ var formatAnswer = function(winner, mode, originDescrip, destDescrip) {
       destDescrip: destDescrip
     });
   }
-  
+
   // convert estimate to $ or minutes
   if (mode === 'fastest') {
     var minutes = Math.floor(winner.estimate / 60);
@@ -137,7 +143,7 @@ var formatAnswer = function(winner, mode, originDescrip, destDescrip) {
   if (staging) {
     answer = 'A taxi from ${originDescrip} to ${destDescrip} will cost an average of ${winnerEstimate}';
   } else {
-    answer = 'The ${mode} ride to ${destDescrip} is from ${winnerCompany}, with an estimate of ${winnerEstimate}';    
+    answer = 'The ${mode} ride to ${destDescrip} is from ${winnerCompany}, with an estimate of ${winnerEstimate}';
   }
 
   return _.template(answer)({
@@ -149,12 +155,12 @@ var formatAnswer = function(winner, mode, originDescrip, destDescrip) {
   });
 };
 
-var exitFunction = function(req, res) {
+var exitFunction = function (req, res) {
   var exitSpeech = 'Have a nice day!';
   res.say(exitSpeech);
 };
 
-var helpFunction = function(req, res) {
+var helpFunction = function (req, res) {
   res.say(helpSpeech);
 };
 
