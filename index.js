@@ -4,7 +4,7 @@ var _ = require('lodash');
 var Alexa = require('alexa-app');
 var app = new Alexa.app('carvis');
 var rideHelper = require('./ride-helper');
-var staging = true;
+var staging = false;
 
 var prompt, reprompt, helpSpeech, utterances, slots;
 
@@ -129,7 +129,7 @@ var formatAnswer = function(winner, mode, originDescrip, destDescrip) {
   } else {
     winner.estimate = (staging) ? winner.estimate * 2 : winner.estimate;
     var dollars = Math.floor(winner.estimate / 100);
-    var cents = winner.estimate % 100;
+    var cents = Math.floor(winner.estimate % 100);
     winnerEstimate = dollars.toString() + ' dollars';
     winnerEstimate += (cents) ? ' and ' + cents.toString() + ' cents' : '';
   }
