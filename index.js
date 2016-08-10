@@ -9,7 +9,7 @@ var staging = true;
 var prompt, reprompt, helpSpeech, utterances, slots;
 
 if (staging) {
-  prompt = 'With CARVIS you can find the average taxi fare from an airport to your hotel, and vice versa. For example, you can ask, CARVIS, how much is a taxi from Marriot San Francisco to SFO?';
+  prompt = 'With CARVIS you can find the average taxi fare from an airport to your hotel, and vice versa. For example, you can ask, CARVIS, how much is a taxi from Marriot San Francisco to SFO airport?';
   reprompt = 'Tell me where you want to be picked up, and where you want to go';
   helpSpeech = prompt;
   utterances = ['How much is a {car|ride|taxi} from {ORIGIN} to {DESTINATION}'];
