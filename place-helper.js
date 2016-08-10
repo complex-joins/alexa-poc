@@ -4,7 +4,8 @@ var _ = require('lodash');
 var key = require('./config/config').GOOGLE_PLACES_API_KEY;
 
 var placesCall = function(place, cb) {
-  var url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${place}&location=37.76999,-122.44696&radius=500&key=${key}';
+  // TODO: make location and radius for destination call dynamic to origin's location
+  var url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${place}&location=0,0&radius=20000000&key=${key}';
   url = _.template(url)({
     place: place,
     key: key
