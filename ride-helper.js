@@ -3,14 +3,15 @@ var fetch = require('node-fetch');
 fetch.Promise = require('bluebird');
 var placesCall = require('./place-helper'); // invoked as placesCall();
 
-var getEstimate = function(requestType, dest, cb, start) {
+// TODO: update dynamically - see config.js
+var lyftToken = require('./config/config').LYFT_BEARER_TOKEN;
+
+var getEstimate = function(requestType, start, dest, cb) {
   var uberURL = 'https://api.uber.com/v1/';
   var lyftURL = 'https://api.lyft.com/v1/';
 
   var uberPath;
   var lyftPath;
-
-  start = start || [37.7773563, -122.3968629]; // Shez's house
 
   if (requestType.includes('cheap')) {
     uberPath = 'estimates/price';
@@ -41,16 +42,7 @@ var getEstimate = function(requestType, dest, cb, start) {
     dest1: dest[1]
   });
 
-  // currently hardcoded and needs to be updated ~daily
-  // TODO: update dynamically
-  var lyftToken = 'Bearer gAAAAABXqCzO85dDTZB20xCniXi9SGQPUARF3-Zzmh7haAmV5pZs6pKwADhRMBRWATEmt1crY73Cst7Q9Kwrvd5WeN6YJy7NTl-t7_kTJQDXvr6tQ4MVA6H4nCtTs5Oi1iFW_f7SAgQmeb6X5Lz9gmtywCMaQYcRDxZ8biE4Ik5lCzMxdxz2dRKQGOBLMfNVT98cuMoRBhwBTAUceT3Rj6VSw_0AqVKcBQ==';
-
-  /* update via:
-  curl -X POST -H "Content-Type: application/json" \
-     --user "nhgXNFoIrr4Q:sinLMosFWSD9OiwgfnSEm3WN8y5Jd_0n" \
-     -d '{"grant_type": "client_credentials", "scope": "public"}' \
-     'https://api.lyft.com/oauth/token'
-  */
+  var lyftAuth = 'Bearer ' + lyftToken;
 
   var firstResult = null;
   var winner = null;
@@ -96,7 +88,7 @@ var getEstimate = function(requestType, dest, cb, start) {
   fetch(lyftEndpoint, {
     method: 'GET',
     headers: {
-      Authorization: lyftToken,
+      Authorization: lyftAuth,
       'Content-Type': 'application/json'
     }
   }).then( function(res) {
@@ -114,7 +106,11 @@ var getEstimate = function(requestType, dest, cb, start) {
       // TODO: make calls to BOTH time and price and return both to alexa as details
       // esp since lyft will still give a time estimate even when there's no valid fare
       // (ex: destination = 'gardendale')
-      lyftEstimate = data.eta_estimates[0].eta_seconds;
+      if (!data.eta_estimates || !data.eta_estimates[0].eta_seconds) {
+        lyftEstimate = -1;
+      } else {
+        lyftEstimate = data.eta_estimates[0].eta_seconds;
+      }
     }
 
     if (firstResult) {
