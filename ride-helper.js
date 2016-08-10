@@ -6,14 +6,12 @@ var placesCall = require('./place-helper'); // invoked as placesCall();
 // TODO: update dynamically - see config.js
 var lyftToken = require('./config/config').LYFT_BEARER_TOKEN;
 
-var getEstimate = function(requestType, dest, cb, start) {
+var getEstimate = function(requestType, start, dest, cb) {
   var uberURL = 'https://api.uber.com/v1/';
   var lyftURL = 'https://api.lyft.com/v1/';
 
   var uberPath;
   var lyftPath;
-
-  start = start || [37.7773563, -122.3968629]; // Shez's house
 
   if (requestType.includes('cheap')) {
     uberPath = 'estimates/price';
