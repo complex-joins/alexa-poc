@@ -19,6 +19,9 @@ $RECYCLE.BIN/
 
 node_modules
 
+# API keys
+config/config.js
+
 # =========================
 # Private methods to APIs
 #=========================
