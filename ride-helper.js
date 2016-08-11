@@ -4,8 +4,10 @@ fetch.Promise = require('bluebird');
 var placesCall = require('./place-helper'); // invoked as placesCall();
 
 // TODO: update dynamically - see config.js
-var lyftToken = require('./config/config')
+var lyftToken = require('../../../../carvis-web/secret/config')
   .LYFT_BEARER_TOKEN;
+var uberToken = require('../../../../carvis-web/secret/config')
+  .UBER_SERVER_TOKEN;
 
 var getEstimate = function (requestType, start, dest, cb) {
   var uberURL = 'https://api.uber.com/v1/';
@@ -44,6 +46,7 @@ var getEstimate = function (requestType, start, dest, cb) {
   });
 
   var lyftAuth = 'Bearer ' + lyftToken;
+  var uberAuth = 'Token ' + uberToken;
 
   var firstResult = null;
   var winner = null;
@@ -51,7 +54,7 @@ var getEstimate = function (requestType, start, dest, cb) {
   fetch(uberEndpoint, {
       method: 'GET',
       headers: {
-        Authorization: 'Token pG-f76yk_TFCTMHtYHhY7xUfLVwmt9u-l4gmgiHE',
+        Authorization: uberAuth,
         'Content-Type': 'application/json'
       }
     })
