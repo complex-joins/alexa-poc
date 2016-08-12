@@ -3,7 +3,7 @@
 Proof of concept app for the Carvis alexa skill.
 
 ## How to run this app
-`npm install` and `node server` in the folder above this (app server).
+`npm install` and `node server` in the app-container folder
 
 ## Issues
 
