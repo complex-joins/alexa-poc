@@ -4,9 +4,9 @@ fetch.Promise = require('bluebird');
 var placesCall = require('./place-helper'); // invoked as placesCall();
 
 // TODO: update dynamically - see config.js
-var lyftToken = require('../../../../carvis-web/secret/config')
+var lyftToken = require('../../../../carvis/carvis-web/secret/config')
   .LYFT_BEARER_TOKEN;
-var uberToken = require('../../../../carvis-web/secret/config')
+var uberToken = require('../../../../carvis/carvis-web/secret/config')
   .UBER_SERVER_TOKEN;
 
 var getEstimate = function (requestType, start, dest, cb) {
