@@ -3,11 +3,20 @@ var fetch = require('node-fetch');
 fetch.Promise = require('bluebird');
 var placesCall = require('./place-helper'); // invoked as placesCall();
 
-// TODO: update dynamically - see config.js
-var lyftToken = require('../../../../carvis/carvis-web/secret/config')
-  .LYFT_BEARER_TOKEN;
-var uberToken = require('../../../../carvis/carvis-web/secret/config')
-  .UBER_SERVER_TOKEN;
+try {
+  // TODO: update lyftToken dynamically - see config.js
+  var lyftToken = require('../../../../carvis/carvis-web/secret/config')
+    .LYFT_BEARER_TOKEN;
+  var uberToken = require('../../../../carvis/carvis-web/secret/config')
+    .UBER_SERVER_TOKEN;
+} catch (ex) {
+  // use local repo's config file as fallback
+  console.log('exception:', ex);
+  var lyftToken = require('./config')
+    .LYFT_BEARER_TOKEN;
+  var uberToken = require('./config')
+    .UBER_SERVER_TOKEN;
+}
 
 var getEstimate = function (requestType, start, dest, cb) {
   var uberURL = 'https://api.uber.com/v1/';
