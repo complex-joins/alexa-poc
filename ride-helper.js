@@ -135,8 +135,9 @@ var getEstimate = function (requestType, start, dest, cb) {
     });
 
   var compare = function (uberEstimate, lyftEstimate) {
-    var uberAsWinner = { 'company': 'Uber', 'estimate': uberEstimate };
-    var lyftAsWinner = { 'company': 'Lyft', 'estimate': lyftEstimate };
+    var estimateType = requestType.includes('cheap') ? 'fare' : 'eta';
+    var uberAsWinner = { vendor: 'Uber', estimate: uberEstimate, estimateType: estimateType };
+    var lyftAsWinner = { vendor: 'Lyft', estimate: lyftEstimate, estimateType: estimateType };
     if (uberEstimate < 0 && lyftEstimate > 0) {
       return lyftAsWinner;
     } else if (lyftEstimate < 0 && uberEstimate > 0) {
@@ -152,7 +153,57 @@ var getEstimate = function (requestType, start, dest, cb) {
 
 };
 
+var addRide = function(ride, userId, origin, destination, cb) {
+  var endpoint = 'http://54.183.205.82/rides';
+  var body = {
+    userId: 2, // TODO: make this dynamic and not hardcoded once alexa auth is implemented
+    rideStatus: 'estimate',
+    originLat: origin.coords[0],
+    originLng: origin.coords[1],
+    originRoutableAddress: origin.descrip,
+    destinationLat: destination.coords[0],
+    destinationLng: destination.coords[1],
+    destinationRoutableAddress: destination.descrip,
+    vendorRideType: null, // TODO: populate correctly
+    winner: ride.vendor
+  };
+
+  if (ride.vendor === 'Uber') {
+    if (ride.estimateType === 'fare') {
+      body.uberEstimatedFare = ride.estimate;
+    } else {
+      body.uberEstimatedDuration = ride.estimate;
+    }
+  } else {
+    if (ride.estimateType === 'fare') {
+      body.lyftEstimatedFare = ride.estimate;
+    } else {
+      body.lyftEstimatedDuration = ride.estimate;
+    }
+  }
+
+  // make post request to /rides endpoint with ride
+  fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    })
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (data) {
+      console.log('data inside POST to /rides:', data);
+      cb(data);
+    })
+    .catch(function (err) {
+      console.log('ERROR posting to /rides', err);
+    });
+};
+
 module.exports = {
   placesCall: placesCall,
-  getEstimate: getEstimate
+  getEstimate: getEstimate,
+  addRide: addRide
 };
