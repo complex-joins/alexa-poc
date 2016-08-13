@@ -1,43 +1,40 @@
 'use strict';
 module.change_code = 1;
 var _ = require('lodash');
+var fetch = require('node-fetch');
 var Alexa = require('alexa-app');
 var app = new Alexa.app('carvis');
 var rideHelper = require('./ride-helper');
-var staging = false;
 
 var prompt, reprompt, helpSpeech, utterances, slots;
 
-if (staging) {
-  prompt = 'With CARVIS you can find the average taxi fare from an airport to your hotel, and vice versa. For example, you can ask, CARVIS, how much is a taxi from Marriot San Francisco to SFO airport?';
-  reprompt = 'Tell me where you want to be picked up, and where you want to go';
-  helpSpeech = prompt;
-  utterances = ['How much is a {car|ride|taxi} from {ORIGIN} to {DESTINATION}'];
+var endpoint = 'http://localhost:8000/alexa/launch';
 
-  slots = {
-    'ORIGIN': 'DESTINATION',
-    'ORIGIN_ONE': 'DESTINATION_ONE',
-    'DESTINATION': 'DESTINATION',
-    'DESTINATION_ONE': 'DESTINATION_ONE',
-  };
-} else {
-  prompt = 'With CARVIS you can order the cheapest or fastest car available. For example, you can say, CARVIS, find me the cheapest ride to Hack Reactor';
-  reprompt = 'Tell me to book the cheapest or fastest car, and where you want to go';
-  helpSpeech = 'CARVIS finds you the cheapest and/or fastest ride to your destination. ';
-  helpSpeech += 'To begin, tell me to book the cheapest or fastest car, and where you want to go';
-  utterances = ['{Find|Get|Order|Call|Book} {a|one|the|me the|me a} {MODE} {car|ride} to {DESTINATION}'];
+app.launch(function (req, response) {
+  fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+  .then(function (res) {
+    return res.json();
+  })
+  .then(function (data) {
+    console.log('data inside POST to /alexa/launch:', data);
+    _.assignIn(app, data); // extend app object with config properties from data
 
-  slots = {
-    'MODE': 'MODE',
-    'DESTINATION': 'DESTINATION',
-    'DESTINATION_ONE': 'DESTINATION_ONE',
-  };
-}
-
-app.launch(function (req, res) {
-  res.say(prompt)
-    .reprompt(reprompt)
-    .shouldEndSession(false);
+    response.say(app.prompt)
+      .reprompt(app.reprompt)
+      .shouldEndSession(false)
+      .send();
+  })
+  .catch(function (err) {
+    console.log('ERROR posting to /alexa/launch', err);
+  });
+  // Intent handlers that don't return an immediate response (because they
+  // do some asynchronous operation) must return false
+  return false;
 });
 
 app.intent('GetEstimate', {

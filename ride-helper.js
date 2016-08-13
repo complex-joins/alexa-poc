@@ -191,24 +191,26 @@ var addRide = function(ride, userId, origin, destination, cb) {
     }
   }
 
+  cb(); // TODO: remove this line when i uncomment fetch
+
   // make post request to /rides endpoint with ride
-  fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    })
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (data) {
-      console.log('data inside POST to /rides:', data);
-      cb(data);
-    })
-    .catch(function (err) {
-      console.log('ERROR posting to /rides', err);
-    });
+  // fetch(endpoint, {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json'
+  //     },
+  //     body: JSON.stringify(body)
+  //   })
+  //   .then(function (res) {
+  //     return res.json();
+  //   })
+  //   .then(function (data) {
+  //     console.log('data inside POST to /rides:', data);
+  //     cb(data);
+  //   })
+  //   .catch(function (err) {
+  //     console.log('ERROR posting to /rides', err);
+  //   });
 };
 
 module.exports = {
