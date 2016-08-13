@@ -156,7 +156,7 @@ var getEstimate = function (requestType, start, dest, cb) {
 var addRide = function(ride, userId, origin, destination, cb) {
   var endpoint = 'http://54.183.205.82/rides';
   var body = {
-    userId: 2, // TODO: make this dynamic and not hardcoded once alexa auth is implemented
+    userId: 1, // TODO: make this dynamic and not hardcoded once alexa auth is implemented
     rideStatus: 'estimate',
     originLat: origin.coords[0],
     originLng: origin.coords[1],
@@ -164,7 +164,7 @@ var addRide = function(ride, userId, origin, destination, cb) {
     destinationLat: destination.coords[0],
     destinationLng: destination.coords[1],
     destinationRoutableAddress: destination.descrip,
-    vendorRideType: null, // TODO: populate correctly
+    winningVendorRideType: null, // TODO: populate correctly
     winner: ride.vendor
   };
 
@@ -172,13 +172,13 @@ var addRide = function(ride, userId, origin, destination, cb) {
     if (ride.estimateType === 'fare') {
       body.uberEstimatedFare = ride.estimate;
     } else {
-      body.uberEstimatedDuration = ride.estimate;
+      body.uberEstimatedETA = ride.estimate;
     }
   } else {
     if (ride.estimateType === 'fare') {
       body.lyftEstimatedFare = ride.estimate;
     } else {
-      body.lyftEstimatedDuration = ride.estimate;
+      body.lyftEstimatedETA = ride.estimate;
     }
   }
 
