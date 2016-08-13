@@ -47,20 +47,21 @@ app.intent('GetEstimate', {
   function (req, res) {
     var slots = req.data.request.intent.slots;
     console.log('slots:', slots);
-    var userId = req.userId; // the unique alexa session userId
+    var userId = req.userId; // the unique alexa session userId. that said, its the *carvis userId* i should be storing in the session and passing to carvis api endpoints
     var mode = (staging) ? 'cheapest' : req.slot('MODE'); // cheapest or fastest
 
     // find the ORIGIN slot that is populated in this request, if any
     var originArray = _.filter(slots, function (slotValue, slotKey) {
       return (slotValue.value && slotValue.value.length > 0 && slotKey.includes('ORIGIN'));
     });
-    var origin = (originArray.length) ? originArray[0].value : null;
+    var origin = (originArray.length) ? { query: originArray[0].value } : {};
     console.log('Alexa thinks my origin is', origin);
 
     // find the DESTINATION slot that is populated in this request
-    var destination = _.filter(slots, function (slotValue, slotKey) {
+    var destinationQuery = _.filter(slots, function (slotValue, slotKey) {
       return (slotValue.value && slotValue.value.length > 0 && slotKey.includes('DESTINATION'));
     })[0].value;
+    var destination = { query: destinationQuery };
     console.log('Alexa thinks my destination is', destination);
 
     // todo: grab user location?
@@ -70,37 +71,42 @@ app.intent('GetEstimate', {
         .reprompt(reprompt)
         .shouldEndSession(false);
     } else {
-      var originDescrip, destDescrip, originCoords, destCoords;
-
-      if (origin) {
+      if (origin.query) {
         // get originDescrip and originCoords for origin that was passed in
-        rideHelper.placesCall(origin, function (descrip, coords) {
-          originDescrip = descrip;
-          originCoords = coords;
-          if (destDescrip) {
-            // make getEstimate call since destDescrip async call resolved first
-            rideHelper.getEstimate(mode, originCoords, destCoords, function (winner) {
-              var answer = formatAnswer(winner, mode, originDescrip, destDescrip);
-              res.say(answer)
-                .send();
+        rideHelper.placesCall(origin.query, function (descrip, coords) {
+          origin.descrip = descrip;
+          origin.coords = coords;
+          if (destination.descrip) {
+            // make getEstimate call since destination.descrip async call resolved first
+            rideHelper.getEstimate(mode, origin.coords, destination.coords, function (winner) {
+              rideHelper.addRide(winner, userId, origin, destination, function() {
+                // TODO: update alexa response based on ride status (i.e., once we know it has been ordered)
+                var answer = formatAnswer(winner, mode, origin.descrip, destination.descrip);
+                res.say(answer)
+                  .send();  
+              });
             });
           }
         });
       } else {
-        // set originDescrip and originCoords to default values
-        originDescrip = 'Casa de Shez';
-        originCoords = [37.7773563, -122.3968629]; // Shez's house
+        // set origin properties to default values
+        // TODO: get origin from User table once alexa auth is implemented
+        origin.descrip = 'Casa de Shez';
+        origin.coords = [37.7773563, -122.3968629]; // Shez's house
       }
 
-      rideHelper.placesCall(destination, function (descrip, coords) {
-        destDescrip = descrip;
-        destCoords = coords;
-        if (originDescrip) {
+      rideHelper.placesCall(destination.query, function (descrip, coords) {
+        destination.descrip = descrip;
+        destination.coords = coords;
+        if (origin.descrip) {
           // make getEstimate call since originDescrip async call resolved first
-          rideHelper.getEstimate(mode, originCoords, destCoords, function (winner) {
-            var answer = formatAnswer(winner, mode, originDescrip, destDescrip);
-            res.say(answer)
-              .send();
+          rideHelper.getEstimate(mode, origin.coords, destination.coords, function (winner) {
+            rideHelper.addRide(winner, userId, origin, destination, function() {
+              // TODO: update alexa response based on ride status (i.e., once we know it has been ordered)
+              var answer = formatAnswer(winner, mode, origin.descrip, destination.descrip);
+              res.say(answer)
+                .send();  
+            });
           });
         }
       });
@@ -143,14 +149,14 @@ var formatAnswer = function (winner, mode, originDescrip, destDescrip) {
   if (staging) {
     answer = 'A taxi from ${originDescrip} to ${destDescrip} will cost an average of ${winnerEstimate}';
   } else {
-    answer = 'The ${mode} ride to ${destDescrip} is from ${winnerCompany}, with an estimate of ${winnerEstimate}';
+    answer = 'The ${mode} ride to ${destDescrip} is from ${winnerVendor}, with an estimate of ${winnerEstimate}';
   }
 
   return _.template(answer)({
     mode: mode,
     originDescrip: originDescrip,
     destDescrip: destDescrip,
-    winnerCompany: winner.company,
+    winnerVendor: winner.vendor,
     winnerEstimate: winnerEstimate
   });
 };
