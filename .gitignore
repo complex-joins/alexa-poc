@@ -20,16 +20,7 @@ $RECYCLE.BIN/
 node_modules
 
 # API keys
-config/config.js
-
-# =========================
-# Private methods to APIs
-#=========================
-
-lyftPrivateMethods.js
-uberPrivateMethods.js
-uberPrivateAPIresponses.js
-anotherConfig.js
+config.js
 
 # =========================
 # Operating System Files
