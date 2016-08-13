@@ -1,7 +1,14 @@
 var fetch = require('node-fetch');
 fetch.Promise = require('bluebird');
 var _ = require('lodash');
-var key = require('../../../../carvis/carvis-web/secret/config').GOOGLE_PLACES_API_KEY;
+
+try {
+  var key = require('../../../../carvis/carvis-web/secret/config').GOOGLE_PLACES_API_KEY;
+} catch (ex) {
+  // use local repo's config file as fallback
+  console.log('exception:', ex);
+  var key = require('./config').GOOGLE_PLACES_API_KEY;
+}
 
 var placesCall = function(place, cb) {
   // TODO: make location and radius for destination call dynamic to origin's location
