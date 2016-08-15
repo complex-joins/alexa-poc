@@ -85,7 +85,7 @@ var exitFunction = function (req, res) {
 };
 
 var helpFunction = function (req, res) {
-  res.say(helpSpeech);
+  res.say(app.helpSpeech);
 };
 
 module.exports = app;
