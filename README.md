@@ -3,7 +3,8 @@
 Proof of concept app for the Carvis alexa skill.
 
 ## How to run this app
-Follow these steps in order 
+
+Follow these steps in order:
 1. Clone down [Alexa-App-Server](https://github.com/complex-joins/alexa-app-server)
 2. Run `npm install`
 3. `cd` into `app-container/apps`
