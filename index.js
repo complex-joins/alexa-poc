@@ -1,165 +1,83 @@
 'use strict';
 module.change_code = 1;
 var _ = require('lodash');
+var fetch = require('node-fetch');
 var Alexa = require('alexa-app');
 var app = new Alexa.app('carvis');
-var rideHelper = require('./ride-helper');
-var staging = false;
 
-var prompt, reprompt, helpSpeech, utterances, slots;
+var slotsForTesting = {
+  'MODE': 'MODE',
+  'DESTINATION': 'DESTINATION',
+  'DESTINATION_ONE': 'DESTINATION_ONE',
+  'ORIGIN': 'DESTINATION',
+  'ORIGIN_ONE': 'DESTINATION_ONE'
+};
 
-if (staging) {
-  prompt = 'With CARVIS you can find the average taxi fare from an airport to your hotel, and vice versa. For example, you can ask, CARVIS, how much is a taxi from Marriot San Francisco to SFO airport?';
-  reprompt = 'Tell me where you want to be picked up, and where you want to go';
-  helpSpeech = prompt;
-  utterances = ['How much is a {car|ride|taxi} from {ORIGIN} to {DESTINATION}'];
-
-  slots = {
-    'ORIGIN': 'DESTINATION',
-    'ORIGIN_ONE': 'DESTINATION_ONE',
-    'DESTINATION': 'DESTINATION',
-    'DESTINATION_ONE': 'DESTINATION_ONE',
-  };
-} else {
-  prompt = 'With CARVIS you can order the cheapest or fastest car available. For example, you can say, CARVIS, find me the cheapest ride to Hack Reactor';
-  reprompt = 'Tell me to book the cheapest or fastest car, and where you want to go';
-  helpSpeech = 'CARVIS finds you the cheapest and/or fastest ride to your destination. ';
-  helpSpeech += 'To begin, tell me to book the cheapest or fastest car, and where you want to go';
-  utterances = ['{Find|Get|Order|Call|Book} {a|one|the|me the|me a} {MODE} {car|ride} to {DESTINATION}'];
-
-  slots = {
-    'MODE': 'MODE',
-    'DESTINATION': 'DESTINATION',
-    'DESTINATION_ONE': 'DESTINATION_ONE',
-  };
-}
+// TODO: make dynamic based on environment
+var baseUrl = 'http://54.183.205.82/alexa/';
 
 app.launch(function (req, res) {
-  res.say(prompt)
-    .reprompt(reprompt)
-    .shouldEndSession(false);
+  // TODO: grab the amazon userId and exchange for carvis userId
+  fetch(baseUrl + 'launch', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+  .then(function (res) {
+    return res.json();
+  })
+  .then(function (data) {
+    console.log('data inside POST to /alexa/launch:', data);
+    _.assignIn(app, data); // extend app object with config properties from data
+
+    res.say(app.prompt)
+      .reprompt(app.reprompt)
+      .shouldEndSession(false)
+      .send();
+  })
+  .catch(function (err) {
+    console.log('ERROR posting to /alexa/launch', err);
+  });
+  // Intent handlers that don't return an immediate response (because they
+  // do some asynchronous operation) must return false
+  return false;
 });
 
 app.intent('GetEstimate', {
-    'slots': slots,
-    'utterances': utterances
+    'slots': slotsForTesting
   },
   function (req, res) {
-    var slots = req.data.request.intent.slots;
-    console.log('slots:', slots);
-    var userId = req.userId; // the unique alexa session userId. that said, its the *carvis userId* i should be storing in the session and passing to carvis api endpoints
-    var mode = (staging) ? 'cheapest' : req.slot('MODE'); // cheapest or fastest
-
-    // find the ORIGIN slot that is populated in this request, if any
-    var originArray = _.filter(slots, function (slotValue, slotKey) {
-      return (slotValue.value && slotValue.value.length > 0 && slotKey.includes('ORIGIN'));
+    fetch(baseUrl + 'estimate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(req)
+    })
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (data) {
+      console.log('response from POST to /alexa/estimate:', data);
+      res.say(data.prompt);
+      if (data.reprompt) { res.reprompt(data.reprompt) }
+      res.shouldEndSession(false)
+        .send();
+    })
+    .catch(function (err) {
+      console.log('ERROR posting to /alexa/estimate', err);
     });
-    var origin = (originArray.length) ? { query: originArray[0].value } : {};
-    console.log('Alexa thinks my origin is', origin);
-
-    // find the DESTINATION slot that is populated in this request
-    var destinationQuery = _.filter(slots, function (slotValue, slotKey) {
-      return (slotValue.value && slotValue.value.length > 0 && slotKey.includes('DESTINATION'));
-    })[0].value;
-    var destination = { query: destinationQuery };
-    console.log('Alexa thinks my destination is', destination);
-
-    // todo: grab user location?
-    if (_.isEmpty(mode) || _.isEmpty(destination)) {
-      prompt = 'I didn\'t catch that. Please try again';
-      res.say(prompt)
-        .reprompt(reprompt)
-        .shouldEndSession(false);
-    } else {
-      if (origin.query) {
-        // get originDescrip and originCoords for origin that was passed in
-        rideHelper.placesCall(origin.query, function (descrip, coords) {
-          origin.descrip = descrip;
-          origin.coords = coords;
-          if (destination.descrip) {
-            // make getEstimate call since destination.descrip async call resolved first
-            rideHelper.getEstimate(mode, origin.coords, destination.coords, function (winner) {
-              rideHelper.addRide(winner, userId, origin, destination, function() {
-                // TODO: update alexa response based on ride status (i.e., once we know it has been ordered)
-                var answer = formatAnswer(winner, mode, origin.descrip, destination.descrip);
-                res.say(answer)
-                  .send();  
-              });
-            });
-          }
-        });
-      } else {
-        // set origin properties to default values
-        // TODO: get origin from User table once alexa auth is implemented
-        origin.descrip = 'Casa de Shez';
-        origin.coords = [37.7773563, -122.3968629]; // Shez's house
-      }
-
-      rideHelper.placesCall(destination.query, function (descrip, coords) {
-        destination.descrip = descrip;
-        destination.coords = coords;
-        if (origin.descrip) {
-          // make getEstimate call since originDescrip async call resolved first
-          rideHelper.getEstimate(mode, origin.coords, destination.coords, function (winner) {
-            rideHelper.addRide(winner, userId, origin, destination, function() {
-              // TODO: update alexa response based on ride status (i.e., once we know it has been ordered)
-              var answer = formatAnswer(winner, mode, origin.descrip, destination.descrip);
-              res.say(answer)
-                .send();  
-            });
-          });
-        }
-      });
-    }
     // Intent handlers that don't return an immediate response (because they
     // do some asynchronous operation) must return false
     return false;
   }
 );
 
-// need to be included to pass Amazon reviews
+// Intents required by Amazon
 app.intent('AMAZON.StopIntent', exitFunction);
 app.intent('AMAZON.CancelIntent', exitFunction);
 app.intent('AMAZON.HelpIntent', helpFunction);
-
-var formatAnswer = function (winner, mode, originDescrip, destDescrip) {
-  mode = mode.includes('cheap') ? 'cheapest' : 'fastest';
-  var winnerEstimate, answer;
-
-  if (!winner) {
-    answer = 'There are no rides available to ${destDescrip}. Please try again.';
-    return _.template(answer)({
-      destDescrip: destDescrip
-    });
-  }
-
-  // convert estimate to $ or minutes
-  if (mode === 'fastest') {
-    var minutes = Math.floor(winner.estimate / 60);
-    winnerEstimate = minutes.toString() + ' minute';
-    winnerEstimate += minutes > 1 ? 's' : '';
-  } else {
-    winner.estimate = (staging) ? winner.estimate * 2 : winner.estimate;
-    var dollars = Math.floor(winner.estimate / 100);
-    var cents = Math.floor(winner.estimate % 100);
-    winnerEstimate = dollars.toString() + ' dollars';
-    winnerEstimate += (cents) ? ' and ' + cents.toString() + ' cents' : '';
-  }
-
-  if (staging) {
-    answer = 'A taxi from ${originDescrip} to ${destDescrip} will cost an average of ${winnerEstimate}';
-  } else {
-    answer = 'The ${mode} ride to ${destDescrip} is from ${winnerVendor}, with an estimate of ${winnerEstimate}';
-  }
-
-  return _.template(answer)({
-    mode: mode,
-    originDescrip: originDescrip,
-    destDescrip: destDescrip,
-    winnerVendor: winner.vendor,
-    winnerEstimate: winnerEstimate
-  });
-};
 
 var exitFunction = function (req, res) {
   var exitSpeech = 'Have a nice day!';
@@ -167,7 +85,7 @@ var exitFunction = function (req, res) {
 };
 
 var helpFunction = function (req, res) {
-  res.say(helpSpeech);
+  res.say(app.helpSpeech);
 };
 
 module.exports = app;
