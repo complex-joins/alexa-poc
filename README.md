@@ -17,7 +17,7 @@ Follow these steps in order:
 7. `cd` up into `app-container` and run `node server`
 
 ## Testing
-Once the server is running go to `localhost:8080/alexa/carvis`. This will lead you to the test page. 
+Once the server is running go to `localhost:8081/alexa/carvis`. This will lead you to the test page. 
 
 
 
