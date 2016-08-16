@@ -14,7 +14,7 @@ var slotsForTesting = {
 };
 
 // TODO: make dynamic based on environment
-var baseUrl = 'http://localhost:8000/alexa/';
+var baseUrl = 'http://54.183.205.82/alexa/';
 
 app.launch(function (req, res) {
   // TODO: grab the amazon userId and exchange for carvis userId
