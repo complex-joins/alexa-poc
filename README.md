@@ -1,3 +1,5 @@
+[![bitHound Overall Score](https://www.bithound.io/github/complex-joins/alexa-poc/badges/score.svg)](https://www.bithound.io/github/complex-joins/alexa-poc)
+
 # Carvis
 
 This is the Amazon Alexa arm of the Carvis service.
