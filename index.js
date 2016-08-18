@@ -15,6 +15,15 @@ var slotsForTesting = {
 };
 
 var baseUrl = config.PROD ? 'http://54.183.205.82/alexa/' : 'http://localhost:8080/alexa/';
+var applicationId = 'amzn1.ask.skill.7ff009fa-df68-4cd4-b6fd-9500d4791b42';
+
+app.pre = function(req, res, type) {
+  var reqAppId = req.data.session.application.applicationId;
+  if (reqAppId !== applicationId && config.PROD) {
+    console.log('Invalid applicationId');
+    res.fail('Invalid applicationId');
+  }
+};
 
 app.launch(function (req, res) {
   // TODO: grab the amazon userId and exchange for carvis userId
