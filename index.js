@@ -4,6 +4,7 @@ var _ = require('lodash');
 var fetch = require('node-fetch');
 var Alexa = require('alexa-app');
 var app = new Alexa.app('carvis');
+var config = require('./config');
 
 var slotsForTesting = {
   'MODE': 'MODE',
@@ -13,9 +14,7 @@ var slotsForTesting = {
   'ORIGIN_ONE': 'DESTINATION_ONE'
 };
 
-// TODO: make dynamic based on environment
-var baseUrl = 'http://54.183.205.82/alexa/';
-// var baseUrl = 'http://localhost:8080/alexa/';
+var baseUrl = config.PROD ? 'http://54.183.205.82/alexa/' : 'http://localhost:8080/alexa/';
 
 app.launch(function (req, res) {
   // TODO: grab the amazon userId and exchange for carvis userId
