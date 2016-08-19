@@ -18,6 +18,10 @@ var baseUrl = config.PROD ? 'http://54.183.205.82/alexa/' : 'http://localhost:80
 var applicationId = 'amzn1.ask.skill.7ff009fa-df68-4cd4-b6fd-9500d4791b42';
 
 app.pre = function(req, res, type) {
+  // TODO: check if carvis userId is stored in the session
+  // if no, exchange the amazon userId for carvis userId and store latter in session
+  // move fetch call from app.launch to here
+  console.log('amazon userId:', req.userId);
   var reqAppId = req.data.session.application.applicationId;
   if (reqAppId !== applicationId && config.PROD) {
     console.log('Invalid applicationId');
@@ -26,7 +30,6 @@ app.pre = function(req, res, type) {
 };
 
 app.launch(function (req, res) {
-  // TODO: grab the amazon userId and exchange for carvis userId
   fetch(baseUrl + 'launch', {
     method: 'POST',
     headers: {
@@ -85,11 +88,11 @@ app.intent('GetEstimate', {
 
 var exitFunction = function (req, res) {
   var exitSpeech = 'Have a nice day!';
-  res.say(exitSpeech);
+  res.say(exitSpeech).send();
 };
 
 var helpFunction = function (req, res) {
-  res.say(app.helpSpeech);
+  res.say(app.helpSpeech).send();
 };
 
 // Intents required by Amazon
