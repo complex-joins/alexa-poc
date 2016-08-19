@@ -71,7 +71,7 @@ app.intent('GetEstimate', {
       console.log('response from POST to /alexa/estimate:', data);
       res.say(data.prompt);
       if (data.reprompt) { res.reprompt(data.reprompt) }
-      res.shouldEndSession(false)
+      res.shouldEndSession(true)
         .send();
     })
     .catch(function (err) {
