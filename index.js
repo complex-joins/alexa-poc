@@ -83,11 +83,6 @@ app.intent('GetEstimate', {
   }
 );
 
-// Intents required by Amazon
-app.intent('AMAZON.StopIntent', exitFunction);
-app.intent('AMAZON.CancelIntent', exitFunction);
-app.intent('AMAZON.HelpIntent', helpFunction);
-
 var exitFunction = function (req, res) {
   var exitSpeech = 'Have a nice day!';
   res.say(exitSpeech);
@@ -96,5 +91,10 @@ var exitFunction = function (req, res) {
 var helpFunction = function (req, res) {
   res.say(app.helpSpeech);
 };
+
+// Intents required by Amazon
+app.intent('AMAZON.StopIntent', exitFunction);
+app.intent('AMAZON.CancelIntent', exitFunction);
+app.intent('AMAZON.HelpIntent', helpFunction);
 
 module.exports = app;
