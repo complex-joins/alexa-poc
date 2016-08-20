@@ -18,39 +18,41 @@ var baseUrl = config.PROD ? 'http://54.183.205.82/alexa/' : 'http://localhost:80
 var applicationId = 'amzn1.ask.skill.7ff009fa-df68-4cd4-b6fd-9500d4791b42';
 
 app.pre = function(req, res, type) {
-  // TODO: check if carvis userId is stored in the session
-  // if no, exchange the amazon userId for carvis userId and store latter in session
-  // move fetch call from app.launch to here
-  console.log('amazon userId:', req.userId);
-  var reqAppId = req.data.session.application.applicationId;
-  if (reqAppId !== applicationId && config.PROD) {
-    console.log('Invalid applicationId');
-    res.fail('Invalid applicationId');
+  //check if carvis userId is stored in the session
+  if(req.session.carvisID) {
+    console.log('amazon userId:', req.userId);
+    // var reqAppId = req.data.session.application.applicationId;
+    // if (reqAppId !== applicationId && config.PROD) {
+    //   console.log('Invalid applicationId');
+    //   res.fail('Invalid applicationId');
+    // }
+  } else {
+    // if no, exchange the amazon userId for carvis userId and store latter in session
+    // move fetch call from app.launch to here
+    fetch(baseUrl + 'launch', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (data) {
+      console.log('data inside POST to /alexa/launch:', data);
+      _.assignIn(app, data); // extend app object with config properties from data
+    })
   }
 };
 
 app.launch(function (req, res) {
-  fetch(baseUrl + 'launch', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-  .then(function (res) {
-    return res.json();
-  })
-  .then(function (data) {
-    console.log('data inside POST to /alexa/launch:', data);
-    _.assignIn(app, data); // extend app object with config properties from data
-
-    res.say(app.prompt)
-      .reprompt(app.reprompt)
-      .shouldEndSession(false)
-      .send();
-  })
-  .catch(function (err) {
-    console.log('ERROR posting to /alexa/launch', err);
-  });
+  res.say(app.prompt)
+    .reprompt(app.reprompt)
+    .shouldEndSession(false)
+    .send()
+  // .catch(function (err) {
+  //   console.log('ERROR posting to /alexa/launch', err);
+  // });
   // Intent handlers that don't return an immediate response (because they
   // do some asynchronous operation) must return false
   return false;
@@ -85,6 +87,7 @@ app.intent('GetEstimate', {
     return false;
   }
 );
+
 
 var exitFunction = function (req, res) {
   var exitSpeech = 'Have a nice day!';
