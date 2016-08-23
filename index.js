@@ -92,7 +92,7 @@ var exitFunction = function (req, res) {
 };
 
 var helpFunction = function (req, res) {
-  res.say(app.helpSpeech).send();
+  res.say(app.helpSpeech).shouldEndSession(false).send();
 };
 
 // Intents required by Amazon
