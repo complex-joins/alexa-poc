@@ -44,6 +44,7 @@ app.pre = function(req, res, type) {
       req.session.carvisUserId = data.carvisUserId;
       _.assignIn(app, data); // extend app object with config properties from data
     })
+    .catch((err) => res.status(400).json(err))
   }
 };
 
