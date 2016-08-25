@@ -26,10 +26,7 @@ app.pre = function(req, res, type) {
     res.fail('Invalid applicationId');
   }
 
-  //check if carvis userId is stored in the session
   if(!req.session.carvisUserId) {
-    // if no, exchange the amazon userId for carvis userId and store latter in session
-    // move fetch call from app.launch to here
     fetch(baseUrl + 'launch/'+req.userId, {
       method: 'POST',
       headers: {
