@@ -5,7 +5,7 @@
 This is the Amazon Alexa arm of the Carvis service.
 
 ## Team
-Built by `@alexcstark`, `@cpruijsen`, `@daredia`, `@JasonArkens17` as our final project `@hackreactor` .
+Built by `@alexcstark`, `@cpruijsen`, `@daredia`, `@JasonArkens17`.
 
 ## How to run this app
 Follow these steps in order:
